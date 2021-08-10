@@ -13,4 +13,4 @@ PASSWORD = '1234'
 DB       = 'kwaterdb'
 TABLE    = 'KWATERTABLE'
 
-USE_REST_API = True
+USE_REST_API = False
