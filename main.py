@@ -3,8 +3,9 @@ from datetime import datetime, timedelta
 from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB
 from tools.print_t import print_t as print
 from tools.check_internet import check_internet
+from tools.time_format import time_format
 from tools.time_synchronization import time_sync
-from tools.time import time_format
+from driver import lxc, ms5837, m30j2
 
 def init():
     if CHOOSE_ONE_USB:
@@ -27,9 +28,50 @@ def init():
     else:
         print('warning', 'No internet connection')
     
-    # devices = list()
-    # devices.append()
+    # Devices setup
+    try:
+        devices = list()
+        devices.append(ms5837.Setup(tag='I2C_0', interval=0.5))
+        devices.append(m30j2.Setup(tag='I2C_1', interval=0.5))
+        devices.append(lxc.Setup(tag='USB_0', port='/dev/ttyUSB0'))
+        devices.append(lxc.Setup(tag='USB_1', port='/dev/ttyUSB1'))
+        devices.append(lxc.Setup(tag='USB_2', port='/dev/ttyUSB2'))
+        devices.append(lxc.Setup(tag='USB_3', port='/dev/ttyUSB3'))
+        devices.append(lxc.Setup(tag='USB_4', port='/dev/ttyUSB4'))
+        devices.append(lxc.Setup(tag='USB_5', port='/dev/ttyUSB5'))
+        devices.append(lxc.Setup(tag='USB_6', port='/dev/ttyUSB6'))
+    except:
+        print('error', 'Failed to setup devices')
+        return False
     
+    # Connect DB
+    for dev in devices:
+        try:
+            dev.connect_db()
+        except:
+            print('error', 'Failed to connect db', dev.name)
+            return False
+    
+    # LXC Serial number search
+    threads = list()
+    for dev in devices:
+        if dev.name == 'lxc':
+            if dev.connect_port():
+                thread = dev.start_search_thread()
+                threads.append(thread)
+                
+    for thread in threads:
+        thread.join()
+    
+    # Devices state
+    for dev in devices:
+        # if dev.name == 'lxc':
+        print(f"{'[LOG]':>10} {dev.tag} - {dev.state}")
+            
+    for dev in devices:
+        if dev.state == 'enabled': 
+            dev.start_read_thread()
+            
     return True
 
 def main():
