@@ -3,7 +3,7 @@ from time       import sleep
 from datetime   import datetime
 
 from threading       import Thread
-from config          import USE_DB, USE_CSV
+from config          import USE_DB, USE_CSV_SAVE
 from config          import HOST, USER, PASSWORD, DB, TABLE 
 from drivers         import database
 from drivers.library import current_time, current_date, save_as_csv, check_internet
@@ -145,7 +145,7 @@ class Setup(M30J2):
                     
                     print(f"{'[READ]':>10} {self.tag} - {time} | {self.name:^12} | {pressure:11.6f} bar  | {temperature:11.6f} C  |")
                     
-                    if USE_CSV:
+                    if USE_CSV_SAVE:
                         path    = f"csv_files/{current_date()}_{self.name}"
                         data    = [ time,   self.name,    pressure,   temperature]
                         columns = ['time', 'serial_num', 'pressure', 'temperature']

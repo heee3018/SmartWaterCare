@@ -1,7 +1,7 @@
 from time      import sleep
 from threading import Thread
 from serial    import Serial, serialutil
-from config    import USE_DB, USE_CSV, CHOOSE_ONE_USB
+from config    import USE_DB, USE_CSV_SAVE, CHOOSE_ONE_USB
 from config    import FIND_COUNT, SERIAL_NUMBER_LIST
 from config    import HOST, USER, PASSWORD, DB, TABLE 
 from drivers   import database
@@ -200,7 +200,7 @@ class Setup(LXC):
                 if None in [time, serial_num, flow_rate, total_volume]:
                     print(f"{'[ERROR]':>10} {self.tag} - Data contains the value none")
                 
-                if USE_CSV:
+                if USE_CSV_SAVE:
                     path    = f"csv_files/{current_date()}_{self.serial_num}"
                     data    = [ time,   serial_num,   flow_rate,   total_volume ]
                     columns = ['time', 'serial_num', 'flow_rate', 'total_volume']
@@ -371,7 +371,7 @@ class Setup(LXC):
 #                             }
                         
 #                         # Save as csv
-#                         if USE_CSV:
+#                         if USE_CSV_SAVE:
 #                             path = f"csv/{current_date()}_{key}"
 #                             data = [time, serial_num, flow_rate, total_volume]
 #                             columns = ['time', 'serial_num', 'flow_rate', 'total_volume']
