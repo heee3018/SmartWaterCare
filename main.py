@@ -5,8 +5,8 @@ from tools.print_t        import print_t as print
 from tools.time_lib       import time_sync, time_format
 from tools.check_internet import check_internet
 from drivers.lxc    import LXCSetup
-from drivers.m30j2  import M30J2Setup
-from drivers.ms5837 import MS5837Setup
+# from drivers.m30j2  import M30J2Setup
+# from drivers.ms5837 import MS5837Setup
 
 def init():
     if CHOOSE_ONE_USB:
