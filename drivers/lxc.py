@@ -2,7 +2,7 @@ from time      import sleep
 from threading import Thread
 from serial    import Serial, serialutil
 
-from config    import SERIAL_NUMBER
+from config    import SMARTWATERCARE_SERIAL_NUMBER
 from config    import USE_CSV_SAVE, CSV_SAVE_PATH
 from config    import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
 from config    import ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST, CHOOSE_ONE_USB
