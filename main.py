@@ -1,10 +1,11 @@
+import os
 from time import time, sleep
 from config import SMARTWATERCARE_SERIAL_NUMBER, ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST
 from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB, LXC_SERIAL_NUMBER_LIST
 from tools.print_t        import print_t as print
 from tools.time_lib       import time_sync, time_format
 from tools.check_internet import check_internet
-from drivers.lxc    import LXCSetup
+from drivers.lxc import LXCSetup
 # from drivers.m30j2  import M30J2Setup
 # from drivers.ms5837 import MS5837Setup
 
