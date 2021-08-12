@@ -1,7 +1,7 @@
-from flip       import flip
 from struct     import unpack
 from binascii   import hexlify   as hex2str
 from binascii   import unhexlify as str2hex
+from tools.flip import flip
     
 READ_COMMAND = str2hex('107BFD7816')
 
