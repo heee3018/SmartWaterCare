@@ -8,7 +8,7 @@ def current_date():
     return datetime.now().strftime('%Y_%m_%d')
 
 def time_sync():
-    os.system('sudo ntpdate -u 3.kr.pool.ntp.org')
+    os.popen('sudo ntpdate -u 3.kr.pool.ntp.org')
     
 def time_format(seconds: int):
     if seconds is not None:
