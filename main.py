@@ -1,8 +1,8 @@
 from time import time, sleep
-from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB
+from config import SMARTWATERCARE_SERIAL_NUMBER, ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST
+from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB, LXC_SERIAL_NUMBER_LIST
 from tools.print_t        import print_t as print
-from tools.time_sync      import time_sync
-from tools.time_format    import time_format
+from tools.time_lib       import time_sync, time_format
 from tools.check_internet import check_internet
 from drivers.lxc    import LXCSetup
 from drivers.m30j2  import M30J2Setup
@@ -29,11 +29,17 @@ def init():
     else:
         print('warning', 'No internet connection')
     
+    print('log', f'SMART WATER CARE SERIAL NUMBER : {SMARTWATERCARE_SERIAL_NUMBER}')
+    
+    print('log', 'LXC Serial number search list :')
+    for serial_num in LXC_SERIAL_NUMBER_LIST:
+        print('log', f'  - {serial_num} : {ULTRASONIC_WATER_METER_LIST[serial_num]}')
+    
     # Devices setup
     try:
         devices = list()
-        devices.append(MS5837Setup(tag='I2C_0', interval=0.5))
-        devices.append(M30J2Setup(tag='I2C_1', interval=0.5))
+        # devices.append(MS5837Setup(tag='I2C_0', interval=0.5))
+        # devices.append(M30J2Setup(tag='I2C_1', interval=0.5))
         devices.append(LXCSetup(tag='USB_0', port='/dev/ttyUSB0'))
         devices.append(LXCSetup(tag='USB_1', port='/dev/ttyUSB1'))
         devices.append(LXCSetup(tag='USB_2', port='/dev/ttyUSB2'))
@@ -43,27 +49,26 @@ def init():
         devices.append(LXCSetup(tag='USB_6', port='/dev/ttyUSB6'))
     except:
         print('error', 'Failed to setup devices')
-        return False
+        return 0
     
     # LXC Serial number search
     threads = list()
     for dev in devices:
         if dev.name == 'lxc':
-            if dev.connect_port():
-                thread = dev.start_search_thread()
-                threads.append(thread)
-                
+            thread = dev.find_thread_start()
+            threads.append(thread)
+            print('log', 'Start address search.', dev.tag)
     for thread in threads:
         thread.join()
     
     # Devices state
     for dev in devices:
-        # if dev.name == 'lxc':
-        print(f"{'[LOG]':>10} {dev.tag} - {dev.state}")
-            
+        print('log' '{dev.state} : {dev.location}', dev.tag)
+
+    # Start loop
     for dev in devices:
-        if dev.state == 'enabled': 
-            dev.start_read_thread()
+        if dev.state == 'GOOD': 
+            dev.loop_thread_start()
             
     return True
 
@@ -71,15 +76,14 @@ def main():
     start_time = time()
     while True:
         op_time = time_format(time()-start_time)
-        sleep(60)
+        sleep(10)
         print('log', f'Operating time: {op_time}')
+
 
 if __name__ == '__main__':
     try:
         if init():
             main()
-        else:
-            pass
         
     except KeyboardInterrupt:
         print('log', 'Keyboard interrupted.')
