@@ -15,13 +15,13 @@ class DBSetup():
         # values : [time, serial_num, flow_rate, total_volume]
         _values = []
         for val in values:
-            _values.append('{'+val+'}')
+            _values.append(str(val))
+            
         _values = str(_values)[1:-1]
         
-        print(sql)
         sql = f"INSERT INTO {table} ({field}) VALUES ({_values})"
         # field  : "time, serial_num, flow_rate, total_volume"
-        # values : "'{time}', '{serial_num}', '{flow_rate}', '{total_volume}'"
+        # values : "'time', 'serial_num', 'flow_rate', 'total_volume'"
         self.cursor.execute(sql)
         self.db.commit()
         
