@@ -70,7 +70,7 @@ def init():
     # LXC Connect serial
     for dev in devices:
         if dev.name == 'lxc':
-            if dev.connect_serial(timeout=1):
+            if dev.connect_serial(timeout=1, number_of_try=10):
                 print('success', 'Successfully connected to the Serial port.', dev.tag)
                       
     # LXC Serial number search

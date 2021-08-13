@@ -50,20 +50,25 @@ class LXCSetup():
             if USE_DB:
                 self.use_db = False
                 print('warning', '"connect_db" -> Cannot connect to DB because there is no internet connection.', self.tag)
-        
-    def connect_serial(self, timeout=1):
-        try:
-            self.ser = Serial(port=self.port, baudrate=2400, parity='E', timeout=timeout)
-            if not self.ser.is_open:
-                self.ser.open()
-        except:
-            print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
-            self.status = 'ERROR_00'
-            return 0
-        
-        self.status = 'GOOD'
-        return True
-    
+            
+    def connect_serial(self, timeout=1, number_of_try=10):
+        for _ in range(number_of_try):
+            try:
+                self.ser = Serial(port=self.port, baudrate=2400, parity='E', timeout=timeout)
+                if not self.ser.is_open:
+                    self.ser.open()
+                    
+                self.status = 'GOOD'
+                return True
+            
+            except:
+                print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
+                continue
+            
+        self.status = 'ERROR_00'
+        return 0
+            
+
     def find_thread_start(self):
         thread = Thread(target=self.find_serial_num, daemon=True)
         thread.start()
@@ -85,7 +90,7 @@ class LXCSetup():
                     self.select_cmd = select_command
                     self.serial_num = flip(fliped_serial_num)
                     self.location   = ULTRASONIC_WATER_METER_LIST[self.serial_num]
-                    print('success', f'"find_serial_num" -> Found {self.serial_num} ({self.location}).', self.tag)
+                    print('success', f'[{self.serial_num}] -> [{self.location}].', self.tag)
                     self.status = 'GOOD'
                     break
                 else:
