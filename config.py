@@ -26,7 +26,7 @@ LOCATION = {
     'SECONDFLOOR_OUTDOOR'               : 'sndfloor_outdoor_'                # 2층 옥외
 }
 
-CHOOSE_ONE_USB         = True
+CHOOSE_ONE_USB = True
 
 ULTRASONIC_WATER_METER_LIST = {
     '20201307' : 'AP_WATER',
@@ -43,7 +43,7 @@ USE_CSV_SAVE  = True
 CSV_SAVE_PATH = '/home/pi/Desktop/CSV_Files'
 
 USE_DB   = True
-HOST     = 'smartwatercare.net'
+HOST     = 'smartwatercare.net' # 13.125.158.130
 USER     = 'kwater01'
 PASSWORD = '1234'
 DB       = 'kwaterdb'
