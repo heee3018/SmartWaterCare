@@ -32,11 +32,10 @@ class LXCSetup():
         self.location   = 'None'
         self.status     = 'GOOD'
         
-        if not self.connect_db():
-            print('error', '"__init__" -> An error occurred while setup the DB', self.tag)
-            
-        if not self.connect_serial(timeout=1):
-            print('error', '__init__" -> An error occurred while setup the Serial', self.tag)
+        if self.connect_db():
+            print('success', '"__init__" -> Successfully connected to the DB.', self.tag)
+        if self.connect_serial(timeout=1):
+            print('success', '"__init__" -> Successfully connected to the Serial port.', self.tag)
 
     def connect_db(self):
         if check_internet():
@@ -48,6 +47,8 @@ class LXCSetup():
                 
                 except:
                     self.use_db = False
+                    print('error', '"connect_db" -> [ERROR_11] An error occurred while setup the DB', self.tag)
+                    self.status = 'ERROR_11'
                     return 0
         else:
             if USE_DB:
@@ -63,6 +64,7 @@ class LXCSetup():
             print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
             self.status = 'ERROR_00'
             return 0
+        
         return True
     
     def find_thread_start(self):
