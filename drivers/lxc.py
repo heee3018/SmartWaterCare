@@ -61,6 +61,7 @@ class LXCSetup():
             self.status = 'ERROR_00'
             return 0
         
+        self.status = 'GOOD'
         return True
     
     def find_thread_start(self):
@@ -191,16 +192,24 @@ class LXCSetup():
         
         print('error', '"loop" -> [ERROR_10] Exit the loop with a fatal error.', self.tag)   
         self.status = 'ERROR_10'
-        sleep(5)
         # To do : Send error message to db
         
-        # while True: 
-        #     if True: 
-        #         # If the condition is satisfied, the loop starts again.
-        #         break        
+        while True: 
+            if not self.connect_serial(): 
+                continue
+            
+            self.find_thread_start().join()
+            
+            if not self.select():
+                continue
+            
+            if not self.read():
+                continue
         
-        print('log', 'Restart the loop.')   
-        self.status = 'GOOD'
+            print('log', 'Restart the loop.')   
+            self.status = 'GOOD'
+            break
+        
         self.loop_thread_start()
         
                                    
