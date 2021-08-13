@@ -59,6 +59,18 @@ def init():
         print('error', 'Failed to setup devices')
         return 0
     
+    # LXC Connect db
+    for dev in devices:
+        if dev.name == 'lxc':
+            if dev.connect_db():
+                print('success', '"init" -> Successfully connected to the DB.', dev.tag)
+    
+    # LXC Connect serial
+    for dev in devices:
+        if dev.name == 'lxc':
+            if dev.connect_serial(timeout=1):
+                print('success', '"init" -> Successfully connected to the Serial port.', dev.tag)
+                      
     # LXC Serial number search
     threads = list()
     for dev in devices:
