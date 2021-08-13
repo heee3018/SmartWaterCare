@@ -69,11 +69,12 @@ def init():
     
     # Devices state
     for dev in devices:
-        print('log' '{dev.state} : {dev.location}', dev.tag)
+        if dev.status == 'GOOD':
+            print('log' f'{dev.state} : {dev.location}', dev.tag)
 
     # Start loop
     for dev in devices:
-        if dev.state == 'GOOD': 
+        if dev.status == 'GOOD': 
             dev.loop_thread_start()
             
     return True
