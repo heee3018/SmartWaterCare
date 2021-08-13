@@ -32,11 +32,7 @@ class LXCSetup():
         self.location   = 'None'
         self.status     = 'GOOD'
         
-        if self.connect_db():
-            print('success', '"__init__" -> Successfully connected to the DB.', self.tag)
-        if self.connect_serial(timeout=1):
-            print('success', '"__init__" -> Successfully connected to the Serial port.', self.tag)
-
+        
     def connect_db(self):
         if check_internet():
             if USE_DB:
@@ -55,7 +51,7 @@ class LXCSetup():
                 self.use_db = False
                 print('warning', '"connect_db" -> Cannot connect to DB because there is no internet connection.', self.tag)
         
-    def connect_serial(self, timeout):
+    def connect_serial(self, timeout=1):
         try:
             self.ser = Serial(port=self.port, baudrate=2400, parity='E', timeout=timeout)
             if not self.ser.is_open:
