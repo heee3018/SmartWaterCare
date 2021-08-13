@@ -9,7 +9,7 @@ from drivers.lxc import LXCSetup
 # from drivers.m30j2  import M30J2Setup
 # from drivers.ms5837 import MS5837Setup
 
-STOP_WATCH_INTERVAL = 5
+STOP_WATCH_INTERVAL = 1
 start_time = time()
 
 def init():
@@ -36,10 +36,12 @@ def init():
     
     print('log', f'SMART WATER CARE SERIAL NUMBER : {SMARTWATERCARE_SERIAL_NUMBER}')
     
+    # LXC Serial number search list
     print('log', 'LXC Serial number search list :')
     for i, serial_num in enumerate(LXC_SERIAL_NUMBER_LIST, start=1):
         print('log', f'  {i}. {serial_num} : {ULTRASONIC_WATER_METER_LIST[serial_num]}')
     
+    # USB list print
     print('log', 'USB connected by Raspberry pi :')
     usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
     for i, usb in enumerate(usb_list, start=1):
@@ -48,15 +50,10 @@ def init():
     # Devices setup
     try:
         devices = list()
-        # devices.append(MS5837Setup(tag='I2C_0', interval=0.5))
+        for usb in usb_list:
+            devices.append(LXCSetup(tag=usb[5:], port=usb))
         # devices.append(M30J2Setup(tag='I2C_1', interval=0.5))
-        devices.append(LXCSetup(tag='USB_0', port='/dev/ttyUSB0'))
-        devices.append(LXCSetup(tag='USB_1', port='/dev/ttyUSB1'))
-        devices.append(LXCSetup(tag='USB_2', port='/dev/ttyUSB2'))
-        devices.append(LXCSetup(tag='USB_3', port='/dev/ttyUSB3'))
-        devices.append(LXCSetup(tag='USB_4', port='/dev/ttyUSB4'))
-        devices.append(LXCSetup(tag='USB_5', port='/dev/ttyUSB5'))
-        devices.append(LXCSetup(tag='USB_6', port='/dev/ttyUSB6'))
+        # devices.append(MS5837Setup(tag='I2C_0', interval=0.5))
     except:
         print('error', 'Failed to setup devices')
         return 0
