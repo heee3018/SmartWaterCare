@@ -72,12 +72,13 @@ def init():
     # Devices state
     for dev in devices:
         if dev.name == 'lxc':
-            print('log' f'{dev.status} : {dev.location}', dev.tag)
+            print('log', f'Status of {dev.tag} : {dev.status}')
 
     # Start loop
     for dev in devices:
         if dev.status == 'GOOD': 
             dev.loop_thread_start()
+            print('log', f'Loop thread start', dev.tag)
             
     return True
 
@@ -86,7 +87,7 @@ def main():
     while True:
         op_time = time_format(time()-start_time)
         sleep(STOP_WATCH_INTERVAL)
-        print('log', f'Operating time: {op_time}')
+        print('log', f'Operating time : {op_time}')
 
 
 if __name__ == '__main__':
