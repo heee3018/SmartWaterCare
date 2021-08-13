@@ -1,3 +1,4 @@
+import os
 from time      import sleep
 from threading import Thread
 from serial    import Serial, serialutil
@@ -64,11 +65,14 @@ class LXCSetup():
             except:
                 print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
                 continue
-            
+        
+        last_connected_usb = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1][-1]
+        print('warnning', '"connect_serial" {self.port} -> {last_connected_usb} change the port', self.tag)
+        self.port   = last_connected_usb
+        self.tag    = last_connected_usb[8:]
         self.status = 'ERROR_00'
         return 0
             
-
     def find_thread_start(self):
         thread = Thread(target=self.find_serial_num, daemon=True)
         thread.start()
@@ -148,6 +152,11 @@ class LXCSetup():
         except:
             print('error', '"read" -> [ERROR_09] An error occurred while converting the data.', self.tag)
             self.status = 'ERROR_09'
+            return 0
+        
+        if self.data['flow_rate'] > 999999:
+            print('error', '"read" -> [ERROR_12] Out of range, The flowrate value is abnormally high', self.tag)
+            self.status = 'ERROR_12'
             return 0
         
         return True
