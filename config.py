@@ -39,6 +39,10 @@ ULTRASONIC_WATER_METER_LIST = {
     '21070110' : 'FIRSTFLOOR_UTILITYROOM_WASHER'}
 LXC_SERIAL_NUMBER_LIST = list(ULTRASONIC_WATER_METER_LIST.keys())
 
+MAXIMUM_CONNECTABLE_USB_LIST = ['/dev/ttyUSB'+str(i) for i in range(14)]
+connected_usb_list = []
+available_usb_list = []
+
 USE_CSV_SAVE  = True
 CSV_SAVE_PATH = '/home/pi/Desktop/CSV_Files'
 

@@ -3,10 +3,12 @@ from time      import sleep
 from threading import Thread
 from serial    import Serial, serialutil
 
+import config
 from config    import SMARTWATERCARE_SERIAL_NUMBER
 from config    import USE_CSV_SAVE, CSV_SAVE_PATH
 from config    import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
 from config    import ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST, CHOOSE_ONE_USB
+from config    import MAXIMUM_CONNECTABLE_USB_LIST
 
 from tools.flip           import flip
 from tools.print_t        import print_t as print
@@ -33,7 +35,6 @@ class LXCSetup():
         self.location   = 'None'
         self.status     = 'GOOD'
         
-        
     def connect_db(self):
         if check_internet():
             if USE_DB:
@@ -52,24 +53,30 @@ class LXCSetup():
                 self.use_db = False
                 print('warning', '"connect_db" -> Cannot connect to DB because there is no internet connection.', self.tag)
             
-    def connect_serial(self, timeout=1, number_of_try=10):
+    def connect_serial(self, mode='', timeout=1, number_of_try=10):
         for _ in range(number_of_try):
             try:
                 self.ser = Serial(port=self.port, baudrate=2400, parity='E', timeout=timeout)
                 if not self.ser.is_open:
                     self.ser.open()
-                    
                 self.status = 'GOOD'
                 return True
-            
             except:
                 print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
                 continue
-        
-        last_connected_usb = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1][-1]
-        print('warnning', '"connect_serial" {self.port} -> {last_connected_usb} change the port', self.tag)
-        self.port   = last_connected_usb
-        self.tag    = last_connected_usb[8:]
+    
+        if mode == 'first':
+            if config.available_usb_list == []:
+                current_connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
+                config.available_usb_list  = list(set(MAXIMUM_CONNECTABLE_USB_LIST) - (set(config.connected_usb_list) & set(current_connected_usb_list)))
+            
+            change_usb = config.available_usb_list[0]
+            del config.available_usb_list[:1]
+            
+            print('warnning', '"connect_serial" {self.port} -> {change_usb} change the port', self.tag)
+            self.port = change_usb
+            self.tag  = change_usb[8:]
+    
         self.status = 'ERROR_00'
         return 0
             

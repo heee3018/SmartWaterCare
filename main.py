@@ -1,5 +1,7 @@
 import os
 from time import time, sleep
+
+import config
 from config import SMARTWATERCARE_SERIAL_NUMBER, ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST
 from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB, LXC_SERIAL_NUMBER_LIST
 from tools.print_t        import print_t as print
@@ -41,16 +43,16 @@ def init():
     for i, serial_num in enumerate(LXC_SERIAL_NUMBER_LIST, start=1):
         print('log', f'  {i}. {serial_num} : {ULTRASONIC_WATER_METER_LIST[serial_num]}')
     
-    # USB list print
+    # USB list update
     print('log', 'USB connected by Raspberry pi :')
-    usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
-    for i, usb in enumerate(usb_list, start=1):
+    config.connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
+    for i, usb in enumerate(config.connected_usb_list, start=1):
         print('log', f'  {i}. {usb[5:]}')
         
     # Devices setup
     try:
         devices = list()
-        for usb in usb_list:
+        for usb in config.connected_usb_list:
             devices.append(LXCSetup(tag=usb[8:], port=usb))
         # devices.append(M30J2Setup(tag='I2C_1', interval=0.5))
         # devices.append(MS5837Setup(tag='I2C_0', interval=0.5))
@@ -67,7 +69,7 @@ def init():
     # LXC Connect serial
     for dev in devices:
         if dev.name == 'lxc':
-            if dev.connect_serial(timeout=1, number_of_try=10):
+            if dev.connect_serial(mode='first'):
                 print('success', 'Successfully connected to the Serial port.', dev.tag)
                       
     # LXC Serial number search
