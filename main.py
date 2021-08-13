@@ -33,13 +33,13 @@ def init():
     print('log', f'SMART WATER CARE SERIAL NUMBER : {SMARTWATERCARE_SERIAL_NUMBER}')
     
     print('log', 'LXC Serial number search list :')
-    for serial_num in LXC_SERIAL_NUMBER_LIST:
-        print('log', f'  - {serial_num} : {ULTRASONIC_WATER_METER_LIST[serial_num]}')
+    for i, serial_num in enumerate(LXC_SERIAL_NUMBER_LIST, start=1):
+        print('log', f'  {i}. {serial_num} : {ULTRASONIC_WATER_METER_LIST[serial_num]}')
     
     print('log', 'USB connected by Raspberry pi :')
     usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
     for i, usb in enumerate(usb_list, start=1):
-        print('log', f'  - {i}. {usb[5:]}')
+        print('log', f'  {i}. {usb[5:]}')
         
     # Devices setup
     try:
