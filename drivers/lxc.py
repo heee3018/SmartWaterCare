@@ -55,7 +55,7 @@ class LXCSetup():
             
     def connect_serial(self, mode='', timeout=1, number_of_try=10):
         for _ in range(number_of_try):
-            print(_)
+            print('log', f'{_}')
             try:
                 self.ser = Serial(port=self.port, baudrate=2400, parity='E', timeout=timeout)
                 if not self.ser.is_open:
