@@ -72,7 +72,7 @@ def init():
     # Devices state
     for dev in devices:
         if dev.name == 'lxc':
-            print('log' f'{dev.state} : {dev.location}', dev.tag)
+            print('log' f'{dev.status} : {dev.location}', dev.tag)
 
     # Start loop
     for dev in devices:
