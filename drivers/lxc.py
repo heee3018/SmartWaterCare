@@ -71,10 +71,10 @@ class LXCSetup():
             if config.available_usb_list == []:
                 current_connected_usb_list  = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
                 config.available_usb_list   = list(set(MAXIMUM_CONNECTABLE_USB_LIST) - (set(config.connected_usb_list) & set(current_connected_usb_list)))
-                _current_connected_usb_list = str([usb[8:] for usb in current_connected_usb_list])[1:-1].replace("'", "").replace(",", "")
-                _available_usb_list         = str([usb[8:] for usb in config.available_usb_list])[1:-1].replace("'", "").replace(",", "")
-                print('log', f'Current connected USB list : {_current_connected_usb_list}')
-                print('log', f'Available USB list         : {_available_usb_list}')
+                current_connected_usb_list_ = str([usb[8:] for usb in current_connected_usb_list])[1:-1].replace("'", "").replace(",", "")
+                available_usb_list_         = str([usb[8:] for usb in config.available_usb_list])[1:-1].replace("'", "").replace(",", "")
+                print('log', f'Current connected USB list : {current_connected_usb_list_}')
+                print('log', f'Available USB list         : {available_usb_list_}')
                        
             change_usb = config.available_usb_list[0]
             del config.available_usb_list[:1]
