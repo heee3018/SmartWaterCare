@@ -191,6 +191,7 @@ class LXCSetup():
         
         print('error', '"loop" -> [ERROR_10] Exit the loop with a fatal error.')   
         self.status = 'ERROR_10'
+        sleep(5)
         # To do : Send error message to db
         
         while True: 
