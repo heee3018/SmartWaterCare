@@ -62,19 +62,23 @@ class LXCSetup():
                 self.status = 'GOOD'
                 return True
             except:
-                print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
+                if _ == number_of_try-1:
+                    print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
                 self.status = 'ERROR_00'
                 continue
     
-        if mode != 'first':
+        if mode != 'first': 
             if config.available_usb_list == []:
                 current_connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
                 config.available_usb_list  = list(set(MAXIMUM_CONNECTABLE_USB_LIST) - (set(config.connected_usb_list) & set(current_connected_usb_list)))
-            
+                
+                print('log', f'Current connected USB list : {str([usb[5:] for usb in current_connected_usb_list])[1:-1]}')
+                print('log', f'Available USB list         : {str([usb[5:] for usb in config.available_usb_list])[1:-1]}')
+                       
             change_usb = config.available_usb_list[0]
             del config.available_usb_list[:1]
             
-            print('warnning', '"connect_serial" {self.port} -> {change_usb} change the port', self.tag)
+            print('warnning', f'"connect_serial" {self.port} -> {change_usb} change the port', self.tag)
             self.port = change_usb
             self.tag  = change_usb[8:]
     
