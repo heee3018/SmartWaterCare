@@ -51,7 +51,7 @@ def init():
     try:
         devices = list()
         for usb in usb_list:
-            devices.append(LXCSetup(tag=usb[5:], port=usb))
+            devices.append(LXCSetup(tag=usb[8:], port=usb))
         # devices.append(M30J2Setup(tag='I2C_1', interval=0.5))
         # devices.append(MS5837Setup(tag='I2C_0', interval=0.5))
     except:
