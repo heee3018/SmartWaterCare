@@ -189,15 +189,15 @@ class LXCSetup():
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
                 self.status = 'GOOD'
         
-        print('error', '"loop" -> [ERROR_10] Exit the loop with a fatal error.')   
+        print('error', '"loop" -> [ERROR_10] Exit the loop with a fatal error.', self.tag)   
         self.status = 'ERROR_10'
         sleep(5)
         # To do : Send error message to db
         
-        while True: 
-            if True: 
-                # If the condition is satisfied, the loop starts again.
-                break        
+        # while True: 
+        #     if True: 
+        #         # If the condition is satisfied, the loop starts again.
+        #         break        
         
         print('log', 'Restart the loop.')   
         self.status = 'GOOD'

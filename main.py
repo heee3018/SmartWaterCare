@@ -10,8 +10,10 @@ from drivers.lxc import LXCSetup
 # from drivers.ms5837 import MS5837Setup
 
 STOP_WATCH_INTERVAL = 5
+start_time = time()
 
 def init():
+    
     if CHOOSE_ONE_USB:
         print('log', 'Use [CHOOSE_ONE_USB] option')
         
@@ -95,11 +97,10 @@ def init():
     return True
 
 def main():
-    start_time = time()
     while True:
         op_time = time_format(time()-start_time)
-        sleep(STOP_WATCH_INTERVAL)
         print('log', f'Operating time : {op_time}')
+        sleep(STOP_WATCH_INTERVAL)
 
 
 if __name__ == '__main__':
