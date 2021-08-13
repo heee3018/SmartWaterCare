@@ -55,7 +55,6 @@ class LXCSetup():
             
     def connect_serial(self, mode='', timeout=1, number_of_try=10):
         for _ in range(number_of_try):
-            print('log', f'{_}')
             try:
                 self.ser = Serial(port=self.port, baudrate=2400, parity='E', timeout=timeout)
                 if not self.ser.is_open:
@@ -64,9 +63,10 @@ class LXCSetup():
                 return True
             except:
                 print('error', '"connect_serial" -> [ERROR_00] An error occurred while setup the serial port.', self.tag)
+                self.status = 'ERROR_00'
                 continue
     
-        if mode == 'first':
+        if mode != 'first':
             if config.available_usb_list == []:
                 current_connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
                 config.available_usb_list  = list(set(MAXIMUM_CONNECTABLE_USB_LIST) - (set(config.connected_usb_list) & set(current_connected_usb_list)))
@@ -78,7 +78,6 @@ class LXCSetup():
             self.port = change_usb
             self.tag  = change_usb[8:]
     
-        self.status = 'ERROR_00'
         sleep(1)
         return 0
             
