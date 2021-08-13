@@ -9,6 +9,8 @@ from drivers.lxc import LXCSetup
 # from drivers.m30j2  import M30J2Setup
 # from drivers.ms5837 import MS5837Setup
 
+STOP_WATCH_INTERVAL = 5
+
 def init():
     if CHOOSE_ONE_USB:
         print('log', 'Use [CHOOSE_ONE_USB] option')
@@ -69,7 +71,7 @@ def init():
     
     # Devices state
     for dev in devices:
-        if dev.status == 'GOOD':
+        if dev.name == 'lxc':
             print('log' f'{dev.state} : {dev.location}', dev.tag)
 
     # Start loop
@@ -83,7 +85,7 @@ def main():
     start_time = time()
     while True:
         op_time = time_format(time()-start_time)
-        sleep(10)
+        sleep(STOP_WATCH_INTERVAL)
         print('log', f'Operating time: {op_time}')
 
 
