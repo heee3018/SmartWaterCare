@@ -13,14 +13,14 @@ class DBSetup():
     def send(self, table, field, values):
         # field  : ['time', 'serial_num', 'flow_rate', 'total_volume']
         # values : ['time', 'serial_num', 'flow_rate', 'total_volume']
-        _field  = str(field)[1:-1]
+        _field  = str(field)[1:-1].replace("'", "")
         _values = []
         for val in values:
             _values.append('{'+val+'}')
         _values = str(_values)[1:-1]
         
         sql = f"INSERT INTO {table} ({_field}) VALUES ({_values})"
-        # field  : "'time',    'serial_num',   'flow_rate',   'total_volume'"
+        # field  : "time, serial_num, flow_rate, total_volume"
         # values : "'{time}', '{serial_num}', '{flow_rate}', '{total_volume}'"
         self.cursor.execute(sql)
         self.db.commit()
