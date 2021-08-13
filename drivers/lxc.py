@@ -72,8 +72,8 @@ class LXCSetup():
                 current_connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
                 config.available_usb_list  = list(set(MAXIMUM_CONNECTABLE_USB_LIST) - (set(config.connected_usb_list) & set(current_connected_usb_list)))
                 
-                print('log', f'Current connected USB list : {str([usb[5:] for usb in current_connected_usb_list])[1:-1]}')
-                print('log', f'Available USB list         : {str([usb[5:] for usb in config.available_usb_list])[1:-1]}')
+                print('log', f'Current connected USB list : {str([usb[8:] for usb in current_connected_usb_list])[1:-1].replace("'", "").replace(",", "")}')
+                print('log', f'Available USB list         : {str([usb[8:] for usb in config.available_usb_list])[1:-1].replace("'", "").replace(",", "")}')
                        
             change_usb = config.available_usb_list[0]
             del config.available_usb_list[:1]
