@@ -182,8 +182,8 @@ class LXCSetup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                 
                 if self.use_db:
-                    field  = ['time', 'serial_num', 'flow_rate', 'total_volume']
-                    values = ['time', 'serial_num', 'flow_rate', 'total_volume']
+                    field  = "time, serial_num, flow_rate, total_volume"
+                    values = [time, serial_num, flow_rate, total_volume]
                     self.db.send(TABLE, field, values)
                 
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
