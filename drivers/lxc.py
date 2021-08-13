@@ -37,7 +37,7 @@ class LXCSetup():
         if check_internet():
             if USE_DB:
                 try:
-                    self.db     = DBSetup(HOST, USER, PASSWORD, DB, TABLE)
+                    self.db     = DBSetup(HOST, USER, PASSWORD, DB)
                     self.use_db = True
                     return True
                 
@@ -182,8 +182,9 @@ class LXCSetup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                 
                 if self.use_db:
-                    sql = f"INSERT INTO {self.db.table} (time, serial_num, flow_rate, total_volume) VALUES ('{time}', '{serial_num}', '{flow_rate}', '{total_volume}')"
-                    self.db.send(sql)
+                    field  = ['time', 'serial_num', 'flow_rate', 'total_volume']
+                    values = ['time', 'serial_num', 'flow_rate', 'total_volume']
+                    self.db.send(TABLE, field, values)
                 
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
                 self.status = 'GOOD'

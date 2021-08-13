@@ -63,18 +63,18 @@ def init():
     for dev in devices:
         if dev.name == 'lxc':
             if dev.connect_db():
-                print('success', '"init" -> Successfully connected to the DB.', dev.tag)
+                print('success', 'Successfully connected to the DB.', dev.tag)
     
     # LXC Connect serial
     for dev in devices:
         if dev.name == 'lxc':
             if dev.connect_serial(timeout=1):
-                print('success', '"init" -> Successfully connected to the Serial port.', dev.tag)
+                print('success', 'Successfully connected to the Serial port.', dev.tag)
                       
     # LXC Serial number search
     threads = list()
     for dev in devices:
-        if dev.name == 'lxc':
+        if dev.name == 'lxc' and dev.status == 'GOOD':
             thread = dev.find_thread_start()
             threads.append(thread)
             print('log', 'Start address search.', dev.tag)
