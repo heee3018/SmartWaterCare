@@ -1,12 +1,18 @@
 from smbus      import SMBus
 from time       import sleep
 from datetime   import datetime
+from threading  import Thread
 
-from threading       import Thread
-from config          import USE_DB, USE_CSV_SAVE
-from config          import HOST, USER, PASSWORD, DB, TABLE 
-from drivers         import database
-from drivers.library import current_time, current_date, save_as_csv, check_internet
+from config import SMARTWATERCARE_SERIAL_NUMBER
+from config import USE_CSV_SAVE, CSV_SAVE_PATH
+from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
+
+from tools.print_t        import print_t as print
+from tools.time_lib       import current_time, current_date
+from tools.save_as_csv    import save_as_csv
+from tools.check_internet import check_internet
+
+from drivers.database import DBSetup
 
 # Conversion factors (from native unit, mbar)
 UNITS_Pa     = 100.0 
@@ -31,42 +37,63 @@ OSR_2048 = 3
 OSR_4096 = 4
 OSR_8192 = 5
 
-class M30J2(object):
+class M30J2Setup():
     _ADDRESS = 0x28
     _P1      = 1638.3   # 10% * 16383 -A Type # 2^14
     _P2      = 13106.4  # 80% * 16383 -A Type # 2^14
     _P_MAX   = 15.0
     _P_MIN   = 0.0
     
-    def __init__(self, tag):
-        self.bus = SMBus(1)
+    def __init__(self, tag, serial_num, interval=0.5):
+        self.name     = 'm30j2'
+        self.tag      = tag
+        self.interval = interval
         
-    
+        self.bus        =  SMBus(1)
+        self.data       =  None
+        self.use_db     =  None
+        self.serial_num =  serial_num
+        self.location   = 'None'
+        self.status     = 'GOOD'
+        
+        if not self.init():
+            print('error', '"__init__" -> [ERROR_01] M30J2 Sensor could not be initialized', self.tag)
+            self.status = 'ERROR_01'
+            
+        if not self.read():
+            print('error', '"__init__" -> [ERROR_02] M30J2 Sensor read failed', self.tag)
+            self.status = 'ERROR_02'
+
+       
     def init(self):
         if self.bus is None:
-            print(f"No bus")
-            return False
+            print('error', '"init" -> [ERROR_03] can\'t find the bus', self.tag)
+            self.status = 'ERROR_03'
+            return 0
         
         return True
-    
+            
     def read(self, oversampling=OSR_8192):
         if self.bus is None:
-            print(f"No bus")
-            return False
+            print('error', '"read" -> [ERROR_04] can\'t find the bus', self.tag)
+            self.status = 'ERROR_04'
+            return 0
         
         if oversampling < OSR_256 or oversampling > OSR_8192:
-            print("Invalid oversampling option!")
-            return False
+            print('error', '"read" -> [ERROR_05] Invalid oversampling option', self.tag)
+            self.status = 'ERROR_05'
+            return 0
         
         sleep(2.5e-6 * 2**(8+oversampling)) # 0.02048
         try:
             read = self.bus.read_i2c_block_data(self._ADDRESS, 0, 4)
         except:
-            return False
+            return 0
         
         if (read[0] & 0xc0) == 0x00:
             d_pressure        = (((read[0] & 0x3f) << 8) | (read[1]))
             d_temperature     = ((read[2] << 3) | (read[3] >> 5))
+            self._time        = current_time()
             self._pressure    = (d_pressure - self._P1) * (self._P_MAX - self._P_MIN) / self._P2 + self._P_MIN
             self._temperature = (d_temperature * 200) / 2047 - 50
         
@@ -85,79 +112,94 @@ class M30J2(object):
             return degC + 273
         
         return degC
-        
     
-class Setup(M30J2):
-    def __init__(self, tag, interval):
-        M30J2.__init__(self, tag)
-        self.name     = 'm30j2'
-        self.tag      =  tag
-        self.data     =  { }
-        self.interval = interval
-        
-        
-        if USE_DB:
-            if USE_DB and check_internet():
-                self.db = database.Setup(HOST, USER, PASSWORD, DB, TABLE)
-                # print(f"{'[LOG]':>10} {self.tag} - You have successfully connected to the db!")
-            
-            elif USE_DB and not check_internet():
-                print(f"{'[WARNING]':>10} {self.tag} - You must be connected to the internet to connect to the db.")
-    
-        self.state = 'enabled'
-        if not self.init():
-            print(f"{'[ERROR]':>10} {self.tag} - M30J2 Sensor could not be initialized")
-            self.state = 'disabled'
-        if not self.read():
-            print(f"{'[ERROR]':>10} {self.tag} - Sensor read failed!")
-            self.state = 'disabled'
-        else:
-            print(f"{'[LOG]':>10} {self.tag} - Pressure: {self._pressure:.2f} bar  Temperature:  {self._temperature:.2f} C")
-       
-       
     def connect_db(self):
-        if USE_DB and check_internet():
-            self.db = database.Setup(HOST, USER, PASSWORD, DB, TABLE)
-            self.use_db = True
-            # print(f"{'[LOG]':>10} {self.tag} - You have successfully connected to the db!")
-        elif USE_DB and not check_internet():
-            self.use_db = False
-            print(f"{'[WARNING]':>10} {self.tag} - You must be connected to the internet to connect to the db.")
+        if check_internet():
+            if USE_DB:
+                try:
+                    self.db     = DBSetup(HOST, USER, PASSWORD, DB)
+                    self.use_db = True
+                    return True
+                
+                except:
+                    self.use_db = False
+                    print('error', '"connect_db" -> [ERROR_06] An error occurred while setup the DB', self.tag)
+                    self.status = 'ERROR_06'
+                    return 0
         else:
-            self.use_db = False
-            
-    def start_read_thread(self):
-        thread = Thread(target=self.read_thread, daemon=True)
+            if USE_DB:
+                self.use_db = False
+                print('warning', '"connect_db" -> Cannot connect to DB because there is no internet connection.', self.tag)
+
+    def loop_thread_start(self):
+        thread = Thread(target=self.loop, daemon=True)
         thread.start()
     
-    def read_thread(self):
-        while True:
-            sleep(self.interval)
+    def loop(self):
+        error_stack = 0
+        while self.status == 'GOOD':
             try:
+                sleep(self.interval)
+                
+                if error_stack > 50:
+                    break
+                
                 if not self.init():
-                    print(f"{'[ERROR]':>10} {self.tag} - M30J2 Sensor could not be initialized")
+                    error_stack += 1
+                    continue
+                
                 if not self.read():
-                    print(f"{'[ERROR]':>10} {self.tag} - Sensor read failed!")
-                else:
-                    time        = current_time()
-                    pressure    = self._pressure
-                    temperature = self._temperature
+                    error_stack += 1
+                    continue
+                
+                time        = self._time
+                serial_num  = self.serial_num
+                pressure    = self._pressure
+                temperature = self._temperature
+                
+                if None in [time, pressure, temperature]:  
+                    error_stack += 1
+                    continue
+                
+                if USE_CSV_SAVE:
+                    path    = f"{CSV_SAVE_PATH}/{current_date()}_{self.serial_num}"
+                    data    = [ time,   serial_num,   pressure,   temperature]
+                    columns = ['time', 'serial_num', 'pressure', 'temperature']
+                    save_as_csv(device=self.name, data=data, columns=columns, path=path)
                     
-                    print(f"{'[READ]':>10} {self.tag} - {time} | {self.name:^12} | {pressure:11.6f} bar  | {temperature:11.6f} C  |")
+                if self.use_db:
+                    field  = "time, serial_num, pressure, temperature"
+                    values = [time, serial_num, pressure, temperature]
+                    self.db.send(TABLE, field, values)
                     
-                    if USE_CSV_SAVE:
-                        path    = f"csv_files/{current_date()}_{self.name}"
-                        data    = [ time,   self.name,    pressure,   temperature]
-                        columns = ['time', 'serial_num', 'pressure', 'temperature']
-                        save_as_csv(device=self.name, data=data, columns=columns, path=path)
-                        
-                    if self.use_db:
-                        sql = f"INSERT INTO {self.db.table} (time, serial_num, pressure, temperature) VALUES ('{time}', '{self.name}', '{pressure}', '{temperature}')"
-                        self.db.send(sql)
-                    
-                    
+                print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar | {temperature:11.6f} C', self.tag)
+                self.status = 'GOOD'
+                
             except OSError:
-                time = current_time()
-                print(f"{'[ERROR]':>10} {self.tag} - {time} | {'':48} |")
-                # print(f"{'[ERROR]':>10} I2C_0 - {time} | {'':12} | {'':16} | {'':14} |")
-                # print(f"{'[ERROR]':>10} I2C_0 - {time} | {'MS5837 Sensor not found.':^48} |")
+                error_stack += 1
+                continue
+            
+        print('error', '"loop" -> [ERROR_07] Exit the loop with a fatal error.', self.tag)   
+        self.status = 'ERROR_07'
+        # To do : Send error message to db
+        # time       = current_time()
+        # serial_num = self.serial_num
+        # error_code = ''
+        
+        # if self.use_db:
+        #     field  = "time, serial_num, error_code"
+        #     values = [time, serial_num, error_code]
+        #     self.db.send(TABLE, field, values)
+        
+        while True:
+            if not self.init():
+                continue
+                
+            if not self.read():
+                continue
+            
+            print('log', 'Restart the loop.')   
+            self.status = 'GOOD'
+            break
+        
+        self.loop_thread_start()

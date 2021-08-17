@@ -4,11 +4,11 @@ from threading import Thread
 from serial    import Serial, serialutil
 
 import config
-from config    import SMARTWATERCARE_SERIAL_NUMBER
-from config    import USE_CSV_SAVE, CSV_SAVE_PATH
-from config    import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
-from config    import ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST, CHOOSE_ONE_USB
-from config    import MAXIMUM_CONNECTABLE_USB_LIST
+from config import SMARTWATERCARE_SERIAL_NUMBER
+from config import USE_CSV_SAVE, CSV_SAVE_PATH
+from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
+from config import ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST, CHOOSE_ONE_USB
+from config import MAXIMUM_CONNECTABLE_USB_LIST
 
 from tools.flip           import flip
 from tools.print_t        import print_t as print
@@ -195,6 +195,7 @@ class LXCSetup():
                 if not self.read():  
                     error_stack += 1
                     continue
+                
                 time         = self.data['time']
                 serial_num   = self.data['serial_num']
                 flow_rate    = self.data['flow_rate']
@@ -221,6 +222,14 @@ class LXCSetup():
         print('error', '"loop" -> [ERROR_10] Exit the loop with a fatal error.', self.tag)   
         self.status = 'ERROR_10'
         # To do : Send error message to db
+        # time       = current_time()
+        # serial_num = self.serial_num
+        # error_code = ''
+        
+        # if self.use_db:
+        #     field  = "time, serial_num, error_code"
+        #     values = [time, serial_num, error_code]
+        #     self.db.send(TABLE, field, values)
         
         while True: 
             if not self.connect_serial(): 

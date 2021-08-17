@@ -1,10 +1,17 @@
-import smbus
-from time            import sleep
-from threading       import Thread
-from config          import USE_DB, USE_CSV_SAVE
-from config          import HOST, USER, PASSWORD, DB, TABLE 
-from drivers         import database
-from drivers.library import current_time, current_date, save_as_csv, check_internet
+from smbus      import SMBus
+from time       import sleep
+from threading  import Thread
+
+from config import SMARTWATERCARE_SERIAL_NUMBER
+from config import USE_CSV_SAVE, CSV_SAVE_PATH
+from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
+
+from tools.print_t        import print_t as print
+from tools.time_lib       import current_time, current_date
+from tools.save_as_csv    import save_as_csv
+from tools.check_internet import check_internet
+
+from drivers.database import DBSetup
 
 # Models
 MODEL_02BA = 0
@@ -37,39 +44,61 @@ UNITS_Centigrade = 1
 UNITS_Farenheit  = 2
 UNITS_Kelvin     = 3
 
-class MS5837(object):
-    # Registers
+
+class MS5837Setup():
     _MS5837_ADDR             = 0x76  
     _MS5837_RESET            = 0x1E
     _MS5837_ADC_READ         = 0x00
     _MS5837_PROM_READ        = 0xA0
     _MS5837_CONVERT_D1_256   = 0x40
     _MS5837_CONVERT_D2_256   = 0x50
-    
-    def __init__(self, model=MODEL_30BA, bus=1):
-        self._model = model
+            
+    def __init__(self, tag, serial_num, interval=0.5, bus=1):
+        MS5837.__init__(self, MS5837_30BA)
+        self.name     = 'ms5837'
+        self.tag      =  tag
+        self.interval =  interval
+        
+        self.i2c        =  MS5837_30BA() 
+        self.data       =  None
+        self.use_db     =  None
+        self.serial_num =  serial_num
+        self.location   = 'None'
+        self.status     = 'GOOD'
+        
+        self._model = MODEL_30BA
         
         try:
-            self._bus = smbus.SMBus(bus)
+            self._bus = SMBus(bus)
         except:
-            print("Bus %d is not available.") % bus
-            print("Available busses are listed as /dev/i2c*")
+            print('error', f'"init" -> [ERROR_00] Bus {bus} is not available. Available busses are listed as /dev/i2c*', self.tag)
+            self.status = 'ERROR_00'
             self._bus = None
-        
+            
         self._fluidDensity = DENSITY_FRESHWATER
-        self._pressure = 0
-        self._temperature = 0
-        self._D1 = 0
-        self._D2 = 0
+        self._pressure     = 0
+        self._temperature  = 0
+        self._D1           = 0
+        self._D2           = 0
+        
+        if not self.init():
+            print('error', '"__init__" -> [ERROR_01] MS5837 Sensor could not be initialized', self.tag)
+            self.status = 'ERROR_01'
+        
+        if not self.read():
+            print('error', '"__init__" -> [ERROR_02] M30J2 Sensor read failed', self.tag)
+            self.status = 'ERROR_02'
+
         
     def init(self):
         if self._bus is None:
-            print("No bus!")
-            return False
+            print('error', '"init" -> [ERROR_03] can\'t find the bus', self.tag)
+            self.status = 'ERROR_03'
+            return 0
         try:
             self._bus.write_byte(self._MS5837_ADDR, self._MS5837_RESET)
         except:
-            return False
+            return 0
         # Wait for reset to complete
         sleep(0.01)
         
@@ -83,25 +112,28 @@ class MS5837(object):
                         
         crc = (self._C[0] & 0xF000) >> 12
         if crc != self._crc4(self._C):
-            print("PROM read error, CRC failed!")
-            return False
+            print('error', '"init" -> [ERROR_04] PROM read error, CRC failed.', self.tag)
+            self.status = 'ERROR_04'
+            return 0
         
         return True
         
     def read(self, oversampling=OSR_8192):
         if self._bus is None:
-            print("No bus!")
-            return False
+            print('error', '"read" -> [ERROR_05] can\'t find the bus', self.tag)
+            self.status = 'ERROR_05'
+            return 0
         
         if oversampling < OSR_256 or oversampling > OSR_8192:
-            print("Invalid oversampling option!")
-            return False
+            print('error', '"read" -> [ERROR_06] Invalid oversampling option', self.tag)
+            self.status = 'ERROR_06'
+            return 0
         
         # Request D1 conversion (temperature)
         try:
             self._bus.write_byte(self._MS5837_ADDR, self._MS5837_CONVERT_D1_256 + 2*oversampling)
         except:
-            return False
+            return 0
         # Maximum conversion time increases linearly with oversampling
         # max time (seconds) ~= 2.2e-6(x) where x = OSR = (2^8, 2^9, ..., 2^13)
         # We use 2.5e-6 for some overhead
@@ -127,15 +159,15 @@ class MS5837(object):
     
     def setFluidDensity(self, denisty):
         self._fluidDensity = denisty
-        
-    # Pressure in requested units
-    # mbar * conversion
+    
     def pressure(self, conversion=UNITS_bar):
+        # Pressure in requested units
+        # mbar * conversion
         return self._pressure * conversion
         
-    # Temperature in requested units
-    # default degrees C
     def temperature(self, conversion=UNITS_Centigrade):
+        # Temperature in requested units
+        # default degrees C
         degC = self._temperature / 100.0
         
         if conversion == UNITS_Farenheit:
@@ -146,16 +178,16 @@ class MS5837(object):
         
         return degC
         
-    # Depth relative to MSL pressure in given fluid density
     def depth(self):
+        # Depth relative to MSL pressure in given fluid density
         return (self.pressure(UNITS_Pa)-101300)/(self._fluidDensity*9.80665)
     
-    # Altitude relative to MSL pressure
     def altitude(self):
+        # Altitude relative to MSL pressure
         return (1-pow((self.pressure()/1013.25),.190284))*145366.45*.3048        
     
-    # Cribbed from datasheet
     def _calculate(self):
+        # Cribbed from datasheet
         OFFi = 0
         SENSi = 0
         Ti = 0
@@ -196,14 +228,16 @@ class MS5837(object):
         SENS2 = SENS-SENSi
         
         if self._model == MODEL_02BA:
+            self._time        = current_time()
             self._temperature = (self._temperature-Ti)
             self._pressure = (((self._D1*SENS2)/2097152-OFF2)/32768)/100.0
         else:
+            self._time        = current_time()
             self._temperature = (self._temperature-Ti)
             self._pressure = (((self._D1*SENS2)/2097152-OFF2)/8192)/10.0   
         
-    # Cribbed from datasheet
     def _crc4(self, n_prom):
+        # Cribbed from datasheet
         n_rem = 0
         
         n_prom[0] = ((n_prom[0]) & 0x0FFF)
@@ -228,106 +262,93 @@ class MS5837(object):
     
         return n_rem ^ 0x00
     
-class MS5837_30BA(MS5837):
-    def __init__(self, bus=1):
-        MS5837.__init__(self, MODEL_30BA, bus)
-        
-class MS5837_02BA(MS5837):
-    def __init__(self, bus=1):
-        MS5837.__init__(self, MODEL_02BA, bus)
-
-class Setup(MS5837):
-    def __init__(self, tag, interval):
-        MS5837.__init__(self, MS5837_30BA)
-        self.name     = 'ms5837'
-        self.tag      =  tag
-        self.data     =  { }
-        self.interval =  interval
-        self.i2c      =  MS5837_30BA() 
-            
-        self.state = 'enabled'
-        if not self.init():
-            print(f"{'[ERROR]':>10} {self.tag} - MS5837 Sensor could not be initialized")
-            self.state = 'disabled'
-        if not self.read():
-            print(f"{'[ERROR]':>10} {self.tag} - Sensor read failed!")
-            self.state = 'disabled'
-        else:
-            print(f"{'[LOG]':>10} {self.tag} - Pressure: {self._pressure:.2f} bar  Temperature:  {self._temperature:.2f} C")
-       
-        # if not self.i2c.init():
-        #     print(f"{'[ERROR]':>10} {self.tag} - MS5837 Sensor could not be initialized")
-    
-        # elif not self.i2c.read():
-        #     print(f"{'[ERROR]':>10} {self.tag} - Sensor read failed!")
-            
-        # else:
-        #     print(f"{'[LOG]':>10} {self.tag} - Pressure: %.2f atm  %.2f Torr  %.2f psi" % (
-        #         self.i2c.pressure(UNITS_atm),
-        #         self.i2c.pressure(UNITS_Torr),
-        #         self.i2c.pressure(UNITS_psi)))
-
-        #     print(f"{'[LOG]':>10} {self.tag} - Temperature: %.2f C  %.2f F  %.2f K" % (
-        #         self.i2c.temperature(UNITS_Centigrade),
-        #         self.i2c.temperature(UNITS_Farenheit),
-        #         self.i2c.temperature(UNITS_Kelvin)))
-
-        #     freshwaterDepth = self.i2c.depth() # default is freshwater
-        #     self.i2c.setFluidDensity(DENSITY_SALTWATER)
-        #     saltwaterDepth = self.i2c.depth() # No nead to read() again
-        #     self.i2c.setFluidDensity(1000) # kg/m^3
-        #     print(f"{'[LOG]':>10} {self.tag} - Depth: %.3f m (freshwater)  %.3f m (saltwater)" % (freshwaterDepth, saltwaterDepth))
-        #     # fluidDensity doesn't matter for altitude() (always MSL air density)
-        #     print(f"{'[LOG]':>10} {self.tag} - MSL Relative Altitude: %.2f m" % self.i2c.altitude()) # relative to Mean Sea Level pressure in air
-    
     def connect_db(self):
-        if USE_DB and check_internet():
-            self.db = database.Setup(HOST, USER, PASSWORD, DB, TABLE)
-            self.use_db = True
-            # print(f"{'[LOG]':>10} {self.tag} - You have successfully connected to the db!")
-        elif USE_DB and not check_internet():
-            self.use_db = False
-            print(f"{'[WARNING]':>10} {self.tag} - You must be connected to the internet to connect to the db.")
+        if check_internet():
+            if USE_DB:
+                try:
+                    self.db     = DBSetup(HOST, USER, PASSWORD, DB)
+                    self.use_db = True
+                    return True
+                
+                except:
+                    self.use_db = False
+                    print('error', '"connect_db" -> [ERROR_06] An error occurred while setup the DB', self.tag)
+                    self.status = 'ERROR_06'
+                    return 0
         else:
-            self.use_db = False
-    def start_read_thread(self):
-        thread = Thread(target=self.read_thread, daemon=True)
+            if USE_DB:
+                self.use_db = False
+                print('warning', '"connect_db" -> Cannot connect to DB because there is no internet connection.', self.tag)
+
+    def loop_thread_start(self):
+        thread = Thread(target=self.loop, daemon=True)
         thread.start()
 
-    def read_thread(self):
-        while True:
-            sleep(self.interval)
+    def loop(self):
+        error_stack = 0
+        while self.status == 'GOOD':
             try:
-                if not self.i2c.init():
-                    pass
-                    
-                if not self.i2c.read():
-                    pass
+                sleep(self.interval)    
                 
-                else:
-                    time        = current_time()
-                    pressure    = self.i2c.pressure(UNITS_bar)
-                    temperature = self.i2c.temperature(UNITS_Centigrade)
+                if error_stack > 50:
+                    break
+                
+                if not self.init():
+                    error_stack += 1
+                    continue
                     
-                    self.data['serial_num'] = {
-                        'time'        : time,
-                        'pressure'    : pressure,
-                        'temperature' : temperature
-                    }
+                if not self.read():
+                    error_stack += 1
+                    continue
+            
+                time        = self._time
+                serial_num  = self.serial_num
+                pressure    = self.pressure(UNITS_bar)
+                temperature = self.temperature(UNITS_Centigrade)
+                
+                if USE_CSV_SAVE:
+                    path    = f"{CSV_SAVE_PATH}/{current_date()}_{self.serial_num}"
+                    data    = [ time,   serial_num,   pressure,   temperature]
+                    columns = ['time', 'serial_num', 'pressure', 'temperature']
+                    save_as_csv(device=self.name, data=data, columns=columns, path=path)
                     
-                    if USE_CSV_SAVE:
-                        path    = f"csv_files/{current_date()}_{self.name}"
-                        data    = [ time,   self.name,    pressure,   temperature]
-                        columns = ['time', 'serial_num', 'pressure', 'temperature']
-                        save_as_csv(device=self.name, data=data, columns=columns, path=path)
-                        
-                    if self.use_db:
-                        self.db.send(f"INSERT INTO {self.db.table} (time, serial_num, pressure, temperature) VALUES ('{time}', '{self.name}', '{pressure}', '{temperature}')")
-                    
-                    print(f"{'[READ]':>10} {self.tag} - {time} | {self.name:^12} | {pressure:11.6f} bar  | {temperature:11.6f} C  |")
+                if self.use_db:
+                    field  = "time, serial_num, pressure, temperature"
+                    values = [time, serial_num, pressure, temperature]
+                    self.db.send(TABLE, field, values)
+                     {self.db.table} (time, serial_num, pressure, temperature) VALUES ('{time}', '{self.name}', '{pressure}', '{temperature}')")
+                
+                print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar | {temperature:11.6f} C', self.tag)
+                self.status = 'GOOD'
                 
             except OSError:
-                time = current_time()
-                print(f"{'[ERROR]':>10} {self.tag} - {time} | {'':48} |")
-                # print(f"{'[ERROR]':>10} I2C_0 - {time} | {'':12} | {'':16} | {'':14} |")
-                # print(f"{'[ERROR]':>10} I2C_0 - {time} | {'MS5837 Sensor not found.':^48} |")
+                error_stack += 1
+                continue
+      
+        print('error', '"loop" -> [ERROR_07] Exit the loop with a fatal error.', self.tag)   
+        self.status = 'ERROR_07'
+        # To do : Send error message to db
+        # time       = current_time()
+        # serial_num = self.serial_num
+        # error_code = ''
+        
+        # if self.use_db:
+        #     field  = "time, serial_num, error_code"
+        #     values = [time, serial_num, error_code]
+        #     self.db.send(TABLE, field, values)
+        
+        while True:
+            if not self.init():
+                continue
+                
+            if not self.read():
+                continue
+            
+            print('log', 'Restart the loop.')   
+            self.status = 'GOOD'
+            break
+        
+        self.loop_thread_start()
+        
+    
+    
