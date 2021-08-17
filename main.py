@@ -55,8 +55,8 @@ def init():
     # Devices setup
 # try:
     devices = list()
-    devices.append(M30J2Setup(tag='I2C_1', serial_num=PRESSURE_SENSOR_SERIAL_NUMBER, interval=0.5))
-    devices.append(MS5837Setup(tag='I2C_0', serial_num='MS583701', interval=0.5))
+    devices.append(M30J2Setup(tag='I2C1', serial_num=PRESSURE_SENSOR_SERIAL_NUMBER, interval=0.5))
+    devices.append(MS5837Setup(tag='I2C0', serial_num='MS583701', interval=0.5))
     for usb in config.connected_usb_list:
         devices.append(LXCSetup(tag=usb[8:], port=usb))
     
