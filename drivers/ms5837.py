@@ -316,8 +316,7 @@ class MS5837Setup():
                     field  = "time, serial_num, pressure, temperature"
                     values = [time, serial_num, pressure, temperature]
                     self.db.send(TABLE, field, values)
-                     {self.db.table} (time, serial_num, pressure, temperature) VALUES ('{time}', '{self.name}', '{pressure}', '{temperature}')")
-                
+                    
                 print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar | {temperature:11.6f} C', self.tag)
                 self.status = 'GOOD'
                 
