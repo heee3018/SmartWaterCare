@@ -54,12 +54,10 @@ class MS5837Setup():
     _MS5837_CONVERT_D2_256   = 0x50
             
     def __init__(self, tag, serial_num, interval=0.5, bus=1):
-        MS5837.__init__(self, MS5837_30BA)
         self.name     = 'ms5837'
         self.tag      =  tag
         self.interval =  interval
         
-        self.i2c        =  MS5837_30BA() 
         self.data       =  None
         self.use_db     =  None
         self.serial_num =  serial_num
