@@ -3,6 +3,9 @@ from time      import sleep
 from threading import Thread
 from serial    import Serial, serialutil
 
+from binascii   import hexlify   as hex2str
+from binascii   import unhexlify as str2hex
+
 import config
 from config import SMARTWATERCARE_SERIAL_NUMBER
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
@@ -101,7 +104,8 @@ class LXCSetup():
                 try:
                     self.ser.write(select_command)
                     if self.none_echo:
-                        self.ser.read(17)
+                        echo = self.ser.read(17)
+                        print('log', f'{hex2str(echo)}')
                     response = self.ser.read(1)
                 except:
                     print('error', '"find_serial_num" -> [ERROR_01] An error occurred in the process of writing and reading.', self.tag)
@@ -126,7 +130,8 @@ class LXCSetup():
         try:
             self.ser.write(self.select_cmd)
             if self.none_echo:
-                self.ser.read(17)
+                echo = self.ser.read(17)
+                print('log', f'{hex2str(echo)}')
             response = self.ser.read(1)
         except:
             print('error', '"select" -> [ERROR_03] An error occurred while selecting a serial number.', self.tag)
@@ -146,7 +151,8 @@ class LXCSetup():
         try:
             self.ser.write(READ_COMMAND)
             if self.none_echo:
-                self.ser.read(5)
+                echo = self.ser.read(5)
+                print('log', f'{hex2str(echo)}')
                 
             read_data = self.ser.read(39)
             # format : b"h!!h\x08\xffr\x15\x13  \x00\x00\x02\x16\x00\x00\x00\x00\x04\x13\x00\x00\x00\x00\x05>\x00\x00\x00\x00\x04m\x17+\xbc'\xe9\x16"
