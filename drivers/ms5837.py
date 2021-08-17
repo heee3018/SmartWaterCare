@@ -84,7 +84,7 @@ class MS5837Setup():
             self.status = 'ERROR_01'
         
         if not self.read():
-            print('error', '"__init__" -> [ERROR_02] M30J2 Sensor read failed', self.tag)
+            print('error', '"__init__" -> [ERROR_02] MS5837 Sensor read failed', self.tag)
             self.status = 'ERROR_02'
 
         
