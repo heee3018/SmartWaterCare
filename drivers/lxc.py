@@ -35,6 +35,8 @@ class LXCSetup():
         self.location   = 'None'
         self.status     = 'GOOD'
         
+        self.none_echo  =  True
+        
     def connect_db(self):
         if check_internet():
             if USE_DB:
@@ -98,6 +100,8 @@ class LXCSetup():
                 select_command = to_select_command(fliped_serial_num)
                 try:
                     self.ser.write(select_command)
+                    if self.none_echo:
+                        self.ser.read(17)
                     response = self.ser.read(1)
                 except:
                     print('error', '"find_serial_num" -> [ERROR_01] An error occurred in the process of writing and reading.', self.tag)
@@ -121,6 +125,8 @@ class LXCSetup():
     def select(self):
         try:
             self.ser.write(self.select_cmd)
+            if self.none_echo:
+                self.ser.read(17)
             response = self.ser.read(1)
         except:
             print('error', '"select" -> [ERROR_03] An error occurred while selecting a serial number.', self.tag)
@@ -139,6 +145,9 @@ class LXCSetup():
     def read(self):
         try:
             self.ser.write(READ_COMMAND)
+            if self.none_echo:
+                self.ser.read(5)
+                
             read_data = self.ser.read(39)
             # format : b"h!!h\x08\xffr\x15\x13  \x00\x00\x02\x16\x00\x00\x00\x00\x04\x13\x00\x00\x00\x00\x05>\x00\x00\x00\x00\x04m\x17+\xbc'\xe9\x16"
         except:
