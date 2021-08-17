@@ -1,8 +1,10 @@
-DONG_NUMBER                  = "201"
-HOUSEHOLD_TYPE               = "E"
-SMARTWATERCARE_SERIAL_NUMBER = "PNC-SWCM-" + DONG_NUMBER + HOUSEHOLD_TYPE
-SMARTWATERCARE_STATUS        = 0     # 0: 정상동작, 1:통신이상
-SMARTWATERCARE_ERRORCODE     = ''
+DONG_NUMBER                   = "201"
+HOUSEHOLD_TYPE                = "E"
+SMARTWATERCARE_SERIAL_NUMBER  = "PNC-SWCM-" + DONG_NUMBER + HOUSEHOLD_TYPE
+SMARTWATERCARE_STATUS         = 0     # 0: 정상동작, 1:통신이상
+SMARTWATERCARE_ERRORCODE      = ''
+
+PRESSURE_SENSOR_SERIAL_NUMBER = 'M30J2001'
 
 LOCATION = {
     'AP_WATER'                          : 'AP_water_',                       # 수돗물 인입유량
