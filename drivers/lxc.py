@@ -38,7 +38,7 @@ class LXCSetup():
         self.location   = 'None'
         self.status     = 'GOOD'
         
-        self.none_echo  =  True
+        self.none_echo  =  False
         
     def connect_db(self):
         if check_internet():
@@ -182,7 +182,7 @@ class LXCSetup():
             print('error', '"read" -> [ERROR_09] An error occurred while converting the data.', self.tag)
             self.status = 'ERROR_09'
             return 0
-        
+                
         if self.data['flow_rate'] > 999999:
             print('error', '"read" -> [ERROR_12] Out of range, The flowrate value is abnormally high', self.tag)
             self.status = 'ERROR_12'
