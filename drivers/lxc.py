@@ -110,7 +110,7 @@ class LXCSetup():
                 except:
                     print('error', '"find_serial_num" -> [ERROR_01] An error occurred in the process of writing and reading.', self.tag)
                     self.status = 'ERROR_01'
-                    break
+                    continue
                         
                 if response == b'\xE5':
                     self.select_cmd = select_command
@@ -122,7 +122,7 @@ class LXCSetup():
                 else:
                     continue
                 
-            if self.serial_num == None:
+            if self.serial_num == 'None':
                 print('error', '"find_serial_num" -> [ERROR_02] No connected LXC found.', self.tag)
                 self.status = 'ERROR_02'
                             
@@ -133,6 +133,10 @@ class LXCSetup():
                 echo = self.ser.read(17)
                 # print('log', f'{hex2str(echo)}')
             response = self.ser.read(1)
+        except TypeError:
+            print('error', '"select" -> [ERROR_13] "None" cannot be written. encode in bytes.', self.tag)
+            self.status = 'ERROR_13'
+            return 0
         except:
             print('error', '"select" -> [ERROR_03] An error occurred while selecting a serial number.', self.tag)
             self.status = 'ERROR_03'
@@ -153,13 +157,18 @@ class LXCSetup():
             if self.none_echo:
                 echo = self.ser.read(5)
                 # print('log', f'{hex2str(echo)}')
-                
             read_data = self.ser.read(39)
             # format : b"h!!h\x08\xffr\x15\x13  \x00\x00\x02\x16\x00\x00\x00\x00\x04\x13\x00\x00\x00\x00\x05>\x00\x00\x00\x00\x04m\x17+\xbc'\xe9\x16"
+        except TypeError:
+            print('error', '"read" -> [ERROR_14] "None" cannot be written. encode in bytes.', self.tag)
+            self.status = 'ERROR_14'
+            return 0
         except:
             print('error', '"read" -> [ERROR_05] An error occurred while executing the Read command.', self.tag)
             self.status = 'ERROR_05'
             return 0
+        
+        
         if read_data[-1:] != b'\x16':
             print('error', '"read" -> [ERROR_06] Last data in read response is not "16".', self.tag)
             self.status = 'ERROR_06'
