@@ -1,6 +1,6 @@
 DONG_NUMBER                   = "201"
 HOUSEHOLD_TYPE                = "E"
-SMARTWATERCARE_SERIAL_NUMBER  = "PNC-SWCM-" + DONG_NUMBER + HOUSEHOLD_TYPE
+SMARTWATERCARE_SERIALNUMBER   = "PNC-SWCM-" + DONG_NUMBER + HOUSEHOLD_TYPE
 SMARTWATERCARE_STATUS         = 0     # 0: 정상동작, 1:통신이상
 SMARTWATERCARE_ERRORCODE      = ''
 
@@ -53,7 +53,7 @@ USE_DB   = True
 HOST     = 'smartwatercare.net' # 13.125.158.130
 USER     = 'kwater01'
 PASSWORD = '1234'
-DB       = 'kwaterdb'
-TABLE    = 'KWATERTABLE'
+DB       = 'smartwatercare'
+TABLE    = 'smart_water_care_models'
 
 USE_REST_API = False
