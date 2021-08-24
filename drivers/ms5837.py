@@ -2,7 +2,7 @@ from smbus      import SMBus
 from time       import sleep
 from threading  import Thread
 
-from config import SMARTWATERCARE_SERIAL_NUMBER
+from config import SMARTWATERCARE_SERIALNUMBER
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
 
