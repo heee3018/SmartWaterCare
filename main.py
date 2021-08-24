@@ -2,7 +2,7 @@ import os
 from time import time, sleep
 
 import config
-from config import SMARTWATERCARE_SERIAL_NUMBER, ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST
+from config import SMARTWATERCARE_SERIALNUMBER, ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST
 from config import PRESSURE_SENSOR_SERIAL_NUMBER
 from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB, LXC_SERIAL_NUMBER_LIST
 
@@ -39,7 +39,7 @@ def init():
     else:
         print('warning', 'No internet connection')
     
-    print('log', f'SMART WATER CARE SERIAL NUMBER : {SMARTWATERCARE_SERIAL_NUMBER}')
+    print('log', f'SMART WATER CARE SERIAL NUMBER : {SMARTWATERCARE_SERIALNUMBER}')
     
     # LXC Serial number search list
     print('log', 'LXC Serial number search list :')
