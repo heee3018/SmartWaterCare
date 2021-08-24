@@ -7,7 +7,7 @@ from binascii   import hexlify   as hex2str
 from binascii   import unhexlify as str2hex
 
 import config
-from config import SMARTWATERCARE_SERIAL_NUMBER
+from config import DONG_NUMBER, HOUSEHOLD_TYPE, SMARTWATERCARE_SERIALNUMBER, LOCATION
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
 from config import ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST, CHOOSE_ONE_USB
@@ -236,8 +236,9 @@ class LXCSetup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                 
                 if self.use_db:
-                    field  = "time, serial_num, flow_rate, total_volume"
-                    values = [time, serial_num, flow_rate, total_volume]
+                    loc    = LOCATION[self.location]
+                    field  = f"dong_number, household_type, smartwatercare_serialnumber, {loc}flowrate, {loc}totalvolume, created_at"
+                    values =  [DONG_NUMBER, HOUSEHOLD_TYPE, SMARTWATERCARE_SERIALNUMBER,     flow_rate,     total_volume, time]
                     self.db.send(TABLE, field, values)
                 
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
