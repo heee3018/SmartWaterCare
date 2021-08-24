@@ -237,8 +237,8 @@ class LXCSetup():
                 
                 if self.use_db:
                     loc    = LOCATION[self.location]
-                    field  = f"dong_number, household_type, smartwatercare_serialnumber, {loc}flowrate, {loc}totalvolume, created_at"
-                    values =  [DONG_NUMBER, HOUSEHOLD_TYPE, SMARTWATERCARE_SERIALNUMBER,     flow_rate,     total_volume, time]
+                    field  = f"dong_number, household_type, smartwatercare_serialnumber, {loc}flowrate, {loc}totalvolume, created_at, updated_at"
+                    values =  [DONG_NUMBER, HOUSEHOLD_TYPE, SMARTWATERCARE_SERIALNUMBER,     flow_rate,     total_volume,       time,       time]
                     self.db.send(TABLE, field, values)
                 
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
