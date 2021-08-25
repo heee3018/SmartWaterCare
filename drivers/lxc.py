@@ -242,7 +242,7 @@ class LXCSetup():
                 
                 if self.use_db:
                     pipe_size = self.pipe_size
-                    locatin   = self.location
+                    location  = self.location
                     field  = f"dong, roomtype, watermeter_sn, watermeter_number,   flowrate,  totalvolume,  pipesize,  getting_time, location"
                     values =  [DONG, ROOMTYPE, serial_num,    self.watermeter_num, flow_rate, total_volume, pipe_size, time,         location]
                     self.db.send(TABLE['lxc'], field, values)
