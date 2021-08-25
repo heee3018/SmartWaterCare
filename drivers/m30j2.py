@@ -3,6 +3,9 @@ from time       import sleep
 from datetime   import datetime
 from threading  import Thread
 
+
+from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER, LOCATION
+from config import PRESSURESENSOR_LIST
 from config import SMARTWATERCARE_SERIALNUMBER
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
@@ -49,12 +52,15 @@ class M30J2Setup():
         self.tag      = tag
         self.interval = interval
         
-        self.bus        =  SMBus(1)
-        self.data       =  None
-        self.use_db     =  None
-        self.serial_num =  serial_num
-        self.location   = 'None'
-        self.status     = 'GOOD'
+        self.bus                =  SMBus(1)
+        self.data               =  None
+        self.use_db             =  None
+        self.location           = 'None'
+        self.status             = 'GOOD'
+        
+        self.serial_num         =  list(PRESSURESENSOR_LIST.keys())[0]
+        self.pressuresensor_num =  PRESSURESENSOR_LIST[self.serial_num][0]
+        self.location           =  PRESSURESENSOR_LIST[self.serial_num][1]
         
         if not self.init():
             print('error', '"__init__" -> [ERROR_01] M30J2 Sensor could not be initialized', self.tag)
@@ -162,15 +168,19 @@ class M30J2Setup():
                     continue
                 
                 if USE_CSV_SAVE:
-                    path    = f"{CSV_SAVE_PATH}/{current_date()}_{self.serial_num}"
+                    path    = f"{CSV_SAVE_PATH}/{current_date()}_{serial_num}"
                     data    = [ time,   serial_num,   pressure,   temperature]
                     columns = ['time', 'serial_num', 'pressure', 'temperature']
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                     
                 if self.use_db:
+                    pressuresensor_number = self.pressuresensor_num
+                    location              = self.location
+                    field  = "dong, roomtype, pressuresensor_sn, pressuresensor_number, pressure, temperature, location, getting_time"
+                    values = [DONG, ROOMTYPE, serial_num,        pressuresensor_number, pressure, temperature, location, time]
                     field  = "time, serial_num, pressure, temperature"
                     values = [time, serial_num, pressure, temperature]
-                    self.db.send(TABLE, field, values)
+                    self.db.send(TABLE['m30j2'], field, values)
                     
                 print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar | {temperature:11.6f} C', self.tag)
                 self.status = 'GOOD'

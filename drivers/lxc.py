@@ -7,10 +7,10 @@ from binascii   import hexlify   as hex2str
 from binascii   import unhexlify as str2hex
 
 import config
-from config import DONG_NUMBER, HOUSEHOLD_TYPE, SMARTWATERCARE_SERIALNUMBER, LOCATION
+from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER, LOCATION
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
-from config import ULTRASONIC_WATER_METER_LIST, LXC_SERIAL_NUMBER_LIST, CHOOSE_ONE_USB
+from config import WATERMETER_LIST
 from config import MAXIMUM_CONNECTABLE_USB_LIST
 
 from tools.flip           import flip
@@ -30,15 +30,17 @@ class LXCSetup():
         self.port     =  port
         self.interval =  interval
         
-        self.ser        =  None
-        self.data       =  None
-        self.use_db     =  None
-        self.select_cmd = 'None'
-        self.serial_num = 'None'
-        self.location   = 'None'
-        self.status     = 'GOOD'
+        self.ser            =  None
+        self.data           =  None
+        self.use_db         =  None
+        self.select_cmd     = 'None'
+        self.status         = 'GOOD'
+        self.echo_mode      =  False
         
-        self.none_echo  =  False
+        self.serial_num     = 'None'
+        self.watermeter_num =  None
+        self.location       = 'None'
+        
         
     def connect_db(self):
         if check_internet():
@@ -99,11 +101,11 @@ class LXCSetup():
     
     def find_serial_num(self):
         if self.status == 'GOOD':
-            for fliped_serial_num in flip(LXC_SERIAL_NUMBER_LIST):
+            for fliped_serial_num in flip(list(WATERMETER_LIST.keys())):
                 select_command = to_select_command(fliped_serial_num)
                 try:
                     self.ser.write(select_command)
-                    if self.none_echo:
+                    if self.echo_mode:
                         echo = self.ser.read(17)
                         # print('log', f'{hex2str(echo)}')
                     response = self.ser.read(1)
@@ -113,9 +115,10 @@ class LXCSetup():
                     continue
                         
                 if response == b'\xE5':
-                    self.select_cmd = select_command
-                    self.serial_num = flip(fliped_serial_num)
-                    self.location   = ULTRASONIC_WATER_METER_LIST[self.serial_num]
+                    self.select_cmd     = select_command
+                    self.serial_num     = flip(fliped_serial_num)
+                    self.watermeter_num = WATERMETER_LIST[self.serial_num][0]
+                    self.location       = WATERMETER_LIST[self.serial_num][1]
                     print('success', f'[{self.serial_num}] -> [{self.location}].', self.tag)
                     self.status = 'GOOD'
                     break
@@ -129,7 +132,7 @@ class LXCSetup():
     def select(self):
         try:
             self.ser.write(self.select_cmd)
-            if self.none_echo:
+            if self.echo_mode:
                 echo = self.ser.read(17)
                 # print('log', f'{hex2str(echo)}')
             response = self.ser.read(1)
@@ -154,7 +157,7 @@ class LXCSetup():
     def read(self):
         try:
             self.ser.write(READ_COMMAND)
-            if self.none_echo:
+            if self.echo_mode:
                 echo = self.ser.read(5)
                 # print('log', f'{hex2str(echo)}')
             read_data = self.ser.read(39)
@@ -236,10 +239,9 @@ class LXCSetup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                 
                 if self.use_db:
-                    loc    = LOCATION[self.location]
-                    field  = f"dong_number, household_type, smartwatercare_serialnumber, {loc}flowrate, {loc}totalvolume, created_at, updated_at"
-                    values =  [DONG_NUMBER, HOUSEHOLD_TYPE, SMARTWATERCARE_SERIALNUMBER,     flow_rate,     total_volume,       time,       time]
-                    self.db.send(TABLE, field, values)
+                    field  = f"dong, roomtype, watermeter_sn, watermeter_number,   flowrate,  totalvolume,  getting_time"
+                    values =  [DONG, ROOMTYPE, serial_num,    self.watermeter_num, flow_rate, total_volume, time]
+                    self.db.send(TABLE['lxc'], field, values)
                 
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
                 self.status = 'GOOD'
