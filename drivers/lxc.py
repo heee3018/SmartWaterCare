@@ -7,7 +7,7 @@ from binascii   import hexlify   as hex2str
 from binascii   import unhexlify as str2hex
 
 import config
-from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER, LOCATION
+from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
 from config import WATERMETER_LIST

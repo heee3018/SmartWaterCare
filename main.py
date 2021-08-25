@@ -11,7 +11,6 @@ from tools.check_internet import check_internet
 
 from drivers.lxc    import LXCSetup
 from drivers.m30j2  import M30J2Setup
-from drivers.ms5837 import MS5837Setup
 
 STOP_WATCH_INTERVAL = 10
 start_time = time()
