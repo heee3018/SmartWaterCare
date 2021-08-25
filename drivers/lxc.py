@@ -39,6 +39,7 @@ class LXCSetup():
         
         self.serial_num     = 'None'
         self.watermeter_num =  None
+        self.pipe_size      = 'None'
         self.location       = 'None'
         
         
@@ -118,7 +119,8 @@ class LXCSetup():
                     self.select_cmd     = select_command
                     self.serial_num     = flip(fliped_serial_num)
                     self.watermeter_num = WATERMETER_LIST[self.serial_num][0]
-                    self.location       = WATERMETER_LIST[self.serial_num][1]
+                    self.pipe_size      = WATERMETER_LIST[self.serial_num][1]
+                    self.location       = WATERMETER_LIST[self.serial_num][2]
                     print('success', f'[{self.serial_num}] -> [{self.location}].', self.tag)
                     self.status = 'GOOD'
                     break
@@ -239,8 +241,10 @@ class LXCSetup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                 
                 if self.use_db:
-                    field  = f"dong, roomtype, watermeter_sn, watermeter_number,   flowrate,  totalvolume,  getting_time"
-                    values =  [DONG, ROOMTYPE, serial_num,    self.watermeter_num, flow_rate, total_volume, time]
+                    pipe_size = self.pipe_size
+                    locatin   = self.location
+                    field  = f"dong, roomtype, watermeter_sn, watermeter_number,   flowrate,  totalvolume,  pipesize,  getting_time, location"
+                    values =  [DONG, ROOMTYPE, serial_num,    self.watermeter_num, flow_rate, total_volume, pipe_size, time,         location]
                     self.db.send(TABLE['lxc'], field, values)
                 
                 print('read', f'{time} | {serial_num:^12} | {flow_rate:11.6f} ㎥/h | {total_volume:11.6f} ㎥', self.tag)
