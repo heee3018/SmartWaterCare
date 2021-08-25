@@ -174,10 +174,10 @@ class M30J2Setup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                     
                 if self.use_db:
-                    pressuresensor_number = self.pressuresensor_num
                     location              = self.location
-                    field  = "dong, roomtype, pressuresensor_sn, pressuresensor_number, pressure, temperature, location, getting_time"
-                    values = [DONG, ROOMTYPE, serial_num,        pressuresensor_number, pressure, temperature, location, time]
+                    pressuresensor_number = self.pressuresensor_num
+                    field  = "dong, roomtype, pressuresensor_sn, pressuresensor_number, pressure, temperature, getting_time, location"
+                    values = [DONG, ROOMTYPE, serial_num,        pressuresensor_number, pressure, temperature, time,         location]
                     field  = "time, serial_num, pressure, temperature"
                     values = [time, serial_num, pressure, temperature]
                     self.db.send(TABLE['m30j2'], field, values)
