@@ -2,9 +2,8 @@ import os
 from time import time, sleep
 
 import config
-from config import SMARTWATERCARE_SERIALNUMBER, WATERMETER_LIST, LXC_SERIAL_NUMBER_LIST
-from config import PRESSURE_SENSOR_SERIAL_NUMBER
-from config import CHOOSE_ONE_USB, USE_CSV_SAVE, USE_DB, LXC_SERIAL_NUMBER_LIST
+from config import SMARTWATERCARE_SERIALNUMBER, WATERMETER_LIST
+from config import USE_CSV_SAVE, USE_DB
 
 from tools.print_t        import print_t as print
 from tools.time_lib       import time_sync, time_format
@@ -18,10 +17,7 @@ STOP_WATCH_INTERVAL = 10
 start_time = time()
 
 def init():
-    
-    if CHOOSE_ONE_USB:
-        print('log', 'Use [CHOOSE_ONE_USB] option')
-        
+            
     if USE_CSV_SAVE:
         print('log', 'Use [USE_CSV_SAVE] option')
     else:
@@ -43,7 +39,7 @@ def init():
     
     # LXC Serial number search list
     print('log', 'LXC Serial number search list :')
-    for i, serial_num in enumerate(LXC_SERIAL_NUMBER_LIST, start=1):
+    for i, serial_num in enumerate(list(WATERMETER_LIST.keys()), start=1):
         print('log', f'  {i}. {serial_num} : {WATERMETER_LIST[serial_num]}')
     
     # USB list update
@@ -54,7 +50,7 @@ def init():
         
     # Devices setup
     devices = list()
-    devices.append(M30J2Setup(tag='I2C1', serial_num=PRESSURE_SENSOR_SERIAL_NUMBER, interval=0.5))
+    devices.append(M30J2Setup(tag='I2C1', interval=0.5))
     for usb in config.connected_usb_list:
         devices.append(LXCSetup(tag=usb[8:], port=usb))
     

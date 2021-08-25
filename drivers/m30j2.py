@@ -47,7 +47,7 @@ class M30J2Setup():
     _P_MAX   = 15.0
     _P_MIN   = 0.0
     
-    def __init__(self, tag, serial_num, interval=0.5):
+    def __init__(self, tag, interval=0.5):
         self.name     = 'm30j2'
         self.tag      = tag
         self.interval = interval
