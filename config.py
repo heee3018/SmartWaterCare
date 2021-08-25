@@ -33,7 +33,7 @@ USER     = 'kwater01'
 PASSWORD = '1234'
 DB       = 'smartwatercare'
 TABLE    = {
-    'lxc'   :'WaterMeter',
-    'm30j2' :'PressureSensor'}
+    'lxc'   :'water_meters',
+    'm30j2' :'pressure_sensors'}
 
 USE_REST_API = False
