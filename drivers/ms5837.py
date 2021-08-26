@@ -100,6 +100,7 @@ class MS5837Setup():
         try:
             self._bus.write_byte(self._MS5837_ADDR, self._MS5837_RESET)
         except:
+            print('error', '"init" -> [ERROR_08] MS5837 Sensor reset failed', self.tag)
             return 0
         # Wait for reset to complete
         sleep(0.01)

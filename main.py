@@ -49,8 +49,8 @@ def init():
         
     # Devices setup
     devices = list()
-    devices.append(MS5837Setup(tag='I2C1', interval=0.5))
-    #devices.append(M30J2Setup(tag='I2C1', interval=0.5))
+    devices.append(MS5837Setup(tag='I2C2', interval=0.5))
+    devices.append(M30J2Setup(tag='I2C1', interval=0.5))
     for usb in config.connected_usb_list:
         devices.append(LXCSetup(tag=usb[8:], port=usb))
     
