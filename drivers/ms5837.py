@@ -2,7 +2,8 @@ from smbus      import SMBus
 from time       import sleep
 from threading  import Thread
 
-from config import SMARTWATERCARE_SERIALNUMBER
+from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER
+from config import PRESSURESENSOR_LIST
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
 
@@ -53,18 +54,21 @@ class MS5837Setup():
     _MS5837_CONVERT_D1_256   = 0x40
     _MS5837_CONVERT_D2_256   = 0x50
             
-    def __init__(self, tag, serial_num, interval=0.5, bus=1):
+    def __init__(self, tag, interval=0.5, bus=1):
         self.name     = 'ms5837'
         self.tag      =  tag
         self.interval =  interval
         
         self.data       =  None
         self.use_db     =  None
-        self.serial_num =  serial_num
         self.location   = 'None'
         self.status     = 'GOOD'
         
         self._model = MODEL_30BA
+        
+        self.serial_num         = list(PRESSURESENSOR_LIST.keys())[0]
+        self.pressuresensor_num = PRESSURESENSOR_LIST[self.serial_num][0]
+        self.location           = PRESSURESENSOR_LIST[self.serial_num][1]
         
         try:
             self._bus = SMBus(bus)
@@ -311,9 +315,12 @@ class MS5837Setup():
                     save_as_csv(device=self.name, data=data, columns=columns, path=path)
                     
                 if self.use_db:
-                    field  = "time, serial_num, pressure, temperature"
-                    values = [time, serial_num, pressure, temperature]
-                    self.db.send(TABLE, field, values)
+                    location              = self.location
+                    pressuresensor_number = self.pressuresensor_num
+                    field  = "dong, roomtype, pressuresensor_sn, pressuresensor_number, pressure, temperature, getting_time, location"
+                    values = [DONG, ROOMTYPE, serial_num,        pressuresensor_number, pressure, temperature, time,         location]
+                    self.db.send(TABLE['m30j2'], field, values)
+                    # MS5837 No Table !!
                     
                 print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar | {temperature:11.6f} C', self.tag)
                 self.status = 'GOOD'

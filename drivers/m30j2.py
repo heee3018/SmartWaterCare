@@ -180,7 +180,7 @@ class M30J2Setup():
                     values = [DONG, ROOMTYPE, serial_num,        pressuresensor_number, pressure, temperature, time,         location]
                     self.db.send(TABLE['m30j2'], field, values)
                     
-                print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar | {temperature:11.6f} C', self.tag)
+                print('read', f'{time} | {serial_num:^12} | {pressure:11.6f} bar  | {temperature:11.6f} C', self.tag)
                 self.status = 'GOOD'
                 
             except OSError:

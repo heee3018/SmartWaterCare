@@ -11,12 +11,12 @@ from tools.check_internet import check_internet
 
 from drivers.lxc    import LXCSetup
 from drivers.m30j2  import M30J2Setup
+from drivers.ms5837 import MS5837Setup
 
 STOP_WATCH_INTERVAL = 10
 start_time = time()
 
-def init():
-            
+def init():  
     if USE_CSV_SAVE:
         print('log', 'Use [USE_CSV_SAVE] option')
     else:
@@ -49,13 +49,10 @@ def init():
         
     # Devices setup
     devices = list()
-    devices.append(M30J2Setup(tag='I2C1', interval=0.5))
+    devices.append(MS5837Setup(tag='I2C1', interval=0.5))
+    #devices.append(M30J2Setup(tag='I2C1', interval=0.5))
     for usb in config.connected_usb_list:
         devices.append(LXCSetup(tag=usb[8:], port=usb))
-    
-# except:
-#     print('error', 'Failed to setup devices')
-#     return 0
     
     # Devices Connect db
     for dev in devices:

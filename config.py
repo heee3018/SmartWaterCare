@@ -6,6 +6,7 @@ SMARTWATERCARE_ERRORCODE      = ''
 
 PRESSURESENSOR_LIST = {
     '8-052121B401': [1, 'AP_WATER'] 
+    
 }
 
 WATERMETER_LIST = {
@@ -20,7 +21,7 @@ WATERMETER_LIST = {
     '20201309'    : [9, '15A', 'FIRSTFLOOR_OUTDOOR']
 }
 
-MAXIMUM_CONNECTABLE_USB_LIST = ['/dev/ttyUSB'+str(i) for i in range(14)]
+MAXIMUM_CONNECTABLE_USB_LIST = ['/dev/ttyUSB'+str(i) for i in range(13)]
 connected_usb_list = []
 available_usb_list = []
 
