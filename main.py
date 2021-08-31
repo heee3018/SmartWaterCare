@@ -2,6 +2,7 @@ import os
 from time import time, sleep
 
 import config
+from config import USE_LXC, USE_MS5837, USE_M30J2
 from config import SMARTWATERCARE_SERIALNUMBER, WATERMETER_LIST
 from config import USE_CSV_SAVE, USE_DB
 
@@ -9,9 +10,12 @@ from tools.print_t        import print_t as print
 from tools.time_lib       import time_sync, time_format
 from tools.check_internet import check_internet
 
-from drivers.lxc    import LXCSetup
-from drivers.m30j2  import M30J2Setup
-from drivers.ms5837 import MS5837Setup
+if USE_LXC:
+    from drivers.lxc    import LXCSetup
+if USE_MS5837:
+    from drivers.ms5837 import MS5837Setup
+if USE_M30J2:
+    from drivers.m30j2  import M30J2Setup
 
 STOP_WATCH_INTERVAL = 10
 start_time = time()
@@ -49,11 +53,14 @@ def init():
         
     # Devices setup
     devices = list()
-    devices.append(MS5837Setup(tag='I2C2', interval=0.5))
-    devices.append(M30J2Setup(tag='I2C1', interval=0.5))
-    for usb in config.connected_usb_list:
-        devices.append(LXCSetup(tag=usb[8:], port=usb))
-    
+    if USE_MS5837:
+        devices.append(MS5837Setup(tag='I2C2', interval=0.5))
+    if USE_M30J2:
+        devices.append(M30J2Setup(tag='I2C1', interval=0.5))
+    if USE_LXC:
+        for usb in config.connected_usb_list:
+            devices.append(LXCSetup(tag=usb[8:], port=usb))
+            
     # Devices Connect db
     for dev in devices:
         if dev.connect_db():
