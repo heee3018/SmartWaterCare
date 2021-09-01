@@ -3,7 +3,6 @@ from time       import sleep
 from threading  import Thread
 
 from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER
-from config import PRESSURESENSOR_LIST
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
 
@@ -54,7 +53,7 @@ class MS5837Setup():
     _MS5837_CONVERT_D1_256   = 0x40
     _MS5837_CONVERT_D2_256   = 0x50
             
-    def __init__(self, tag, interval=0.5, bus=1):
+    def __init__(self, tag, device, interval=0.5, bus=1):
         self.name     = 'ms5837'
         self.tag      =  tag
         self.interval =  interval
@@ -66,9 +65,10 @@ class MS5837Setup():
         
         self._model = MODEL_30BA
         
-        self.serial_num         = list(PRESSURESENSOR_LIST.keys())[0]
-        self.pressuresensor_num = PRESSURESENSOR_LIST[self.serial_num][0]
-        self.location           = PRESSURESENSOR_LIST[self.serial_num][1]
+        
+        self.serial_num         =  list(device.keys())[0]
+        self.pressuresensor_num =  device[self.serial_num][0]
+        self.location           =  device[self.serial_num][1]
         
         try:
             self._bus = SMBus(bus)

@@ -3,7 +3,7 @@ from time import time, sleep
 
 import config
 from config import USE_LXC, USE_MS5837, USE_M30J2
-from config import SMARTWATERCARE_SERIALNUMBER, WATERMETER_LIST
+from config import DEVICES
 from config import USE_CSV_SAVE, USE_DB
 
 from tools.print_t        import print_t as print
@@ -17,47 +17,50 @@ if USE_MS5837:
 if USE_M30J2:
     from drivers.m30j2  import M30J2Setup
 
-STOP_WATCH_INTERVAL = 10
 start_time = time()
+STOPWATCH_INTERVAL = 10
 
 def init():  
-    if USE_CSV_SAVE:
-        print('log', 'Use [USE_CSV_SAVE] option')
-    else:
-        print('warning', '[USE_CSV_SAVE] option is off')
-        
-    if USE_DB:
-        print('log', 'Use [USE_DB] option')
-    else:
-        print('warning', '[USE_DB] option is off')
     
+    # Check if the Raspberry Pi is connected to the Internet.
     if check_internet():
         print('log', 'Connected to the Internet.')
         time_sync()
         print('log', 'Synchronized the time')
     else:
         print('warning', 'No internet connection')
+        
+    # Check whether to save the data as a CSV file.
+    if USE_CSV_SAVE:
+        print('log', 'Use [USE_CSV_SAVE] option')
+    else:
+        print('warning', '[USE_CSV_SAVE] option is off')
     
-    print('log', f'SMART WATER CARE SERIAL NUMBER : {SMARTWATERCARE_SERIALNUMBER}')
+    # Checks whether to send data to the connected DB server. 
+    if USE_DB:
+        print('log', 'Use [USE_DB] option')
+    else:
+        print('warning', '[USE_DB] option is off')
+
+    if USE_LXC:
+        # LXC Serial number list
+        print('log', 'LXC Serial number search list :')
+        for serial_num in list(DEVICES['lxc'].keys()):
+            print('log', f'  - {DEVICES[serial_num][0]}  {DEVICES[serial_num][1]}  {serial_num}  {DEVICES[serial_num][2]}')
     
-    # LXC Serial number search list
-    print('log', 'LXC Serial number search list :')
-    for i, serial_num in enumerate(list(WATERMETER_LIST.keys()), start=1):
-        print('log', f'  {i}. {serial_num} : {WATERMETER_LIST[serial_num]}')
-    
-    # USB list update
-    print('log', 'USB connected by Raspberry pi :')
-    config.connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
-    for i, usb in enumerate(config.connected_usb_list, start=1):
-        print('log', f'  {i}. {usb[5:]}')
+        # USB list update
+        print('log', 'USB connected by Raspberry pi :')
+        config.connected_usb_list = os.popen('ls /dev/ttyUSB*').read().split('\n')[:-1]
+        for i, usb in enumerate(config.connected_usb_list, start=1):
+            print('log', f'  {i}. {usb[5:]}')
         
     # Devices setup
     devices = list()
-    if USE_MS5837:
-        devices.append(MS5837Setup(tag='I2C2', interval=0.5))
-    if USE_M30J2:
-        devices.append(M30J2Setup(tag='I2C1', interval=0.5))
-    if USE_LXC:
+    if USE_MS5837 and 'ms5837' in list(DEVICES.keys()):
+        devices.append(MS5837Setup(tag='I2C0', device=, interval=0.5))
+    if USE_M30J2 and 'm30j2' in list(DEVICES.keys()):
+        devices.append(M30J2Setup(tag='I2C1', device=, interval=0.5))
+    if USE_LXC and 'lxc' in list(DEVICES.keys()):
         for usb in config.connected_usb_list:
             devices.append(LXCSetup(tag=usb[8:], port=usb))
             
@@ -98,13 +101,15 @@ def main():
     while True:
         op_time = time_format(time()-start_time)
         print('log', f'Operating time : {op_time}')
-        sleep(STOP_WATCH_INTERVAL)
+        sleep(STOPWATCH_INTERVAL)
 
 
 if __name__ == '__main__':
     try:
         if init():
             main()
+        else:
+            print('error', 'A problem occurred during initialization.')
         
     except KeyboardInterrupt:
         print('log', 'Keyboard interrupted.')

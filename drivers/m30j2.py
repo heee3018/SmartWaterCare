@@ -5,7 +5,6 @@ from threading  import Thread
 
 
 from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER
-from config import PRESSURESENSOR_LIST
 from config import SMARTWATERCARE_SERIALNUMBER
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
@@ -47,7 +46,7 @@ class M30J2Setup():
     _P_MAX   = 15.0
     _P_MIN   = 0.0
     
-    def __init__(self, tag, interval=0.5):
+    def __init__(self, tag, device, interval=0.5):
         self.name     = 'm30j2'
         self.tag      = tag
         self.interval = interval
@@ -58,9 +57,9 @@ class M30J2Setup():
         self.location           = 'None'
         self.status             = 'GOOD'
         
-        self.serial_num         =  list(PRESSURESENSOR_LIST.keys())[0]
-        self.pressuresensor_num =  PRESSURESENSOR_LIST[self.serial_num][0]
-        self.location           =  PRESSURESENSOR_LIST[self.serial_num][1]
+        self.serial_num         =  list(device.keys())[0]
+        self.pressuresensor_num =  device[self.serial_num][0]
+        self.location           =  device[self.serial_num][1]
         
         if not self.init():
             print('error', '"__init__" -> [ERROR_01] M30J2 Sensor could not be initialized', self.tag)
