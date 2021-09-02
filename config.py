@@ -12,6 +12,8 @@ USE_M30J2     = True
 USE_DB        = True
 USE_CSV_SAVE  = True
 
+STOPWATCH_INTERVAL = 10
+
 MAXIMUM_CONNECTABLE_USB_LIST = ['/dev/ttyUSB'+str(i) for i in range(13)]
 connected_usb_list = []
 available_usb_list = []
@@ -24,6 +26,6 @@ PASSWORD = '1234'
 DB       = 'smartwatercare'
 TABLE    = {
     'lxc'   :'water_meters',
-    'ms5837':'pressure_sensors', 
-    'm30j2' :'pressure_sensors'
+    'm30j2' :'pressure_sensors',
+    'ms5837':'pressure_sensors' 
 }

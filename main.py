@@ -3,22 +3,16 @@ from time import time, sleep
 
 import config
 from config import USE_LXC, USE_MS5837, USE_M30J2
-from config import DEVICES
+from config import DEVICES, STOPWATCH_INTERVAL
 from config import USE_CSV_SAVE, USE_DB
 
 from tools.print_t        import print_t as print
 from tools.time_lib       import time_sync, time_format
 from tools.check_internet import check_internet
 
-if USE_LXC:
-    from drivers.lxc    import LXCSetup
-if USE_MS5837:
-    from drivers.ms5837 import MS5837Setup
-if USE_M30J2:
-    from drivers.m30j2  import M30J2Setup
-
-start_time = time()
-STOPWATCH_INTERVAL = 10
+from drivers.lxc    import LXCSetup
+from drivers.m30j2  import M30J2Setup
+from drivers.ms5837 import MS5837Setup
 
 def init():  
     
@@ -57,9 +51,9 @@ def init():
     # Devices setup
     devices = list()
     if USE_MS5837 and 'ms5837' in list(DEVICES.keys()):
-        devices.append(MS5837Setup(tag='I2C0', device=, interval=0.5))
+        devices.append(MS5837Setup(tag='I2C0', device=DEVICES['ms5837'], interval=0.5))
     if USE_M30J2 and 'm30j2' in list(DEVICES.keys()):
-        devices.append(M30J2Setup(tag='I2C1', device=, interval=0.5))
+        devices.append(M30J2Setup(tag='I2C1', device=DEVICES['m30j2'], interval=0.5))
     if USE_LXC and 'lxc' in list(DEVICES.keys()):
         for usb in config.connected_usb_list:
             devices.append(LXCSetup(tag=usb[8:], port=usb))
@@ -98,6 +92,7 @@ def init():
     return True
 
 def main():
+    start_time = time()
     while True:
         op_time = time_format(time()-start_time)
         print('log', f'Operating time : {op_time}')

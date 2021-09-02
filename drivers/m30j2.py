@@ -4,8 +4,7 @@ from datetime   import datetime
 from threading  import Thread
 
 
-from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER
-from config import SMARTWATERCARE_SERIALNUMBER
+from config import DONG, ROOMTYPE
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE
 

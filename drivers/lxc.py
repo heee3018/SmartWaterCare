@@ -7,10 +7,10 @@ from binascii   import hexlify   as hex2str
 from binascii   import unhexlify as str2hex
 
 import config
-from config import DONG, ROOMTYPE, SMARTWATERCARE_SERIALNUMBER
+from config import DONG, ROOMTYPE
 from config import USE_CSV_SAVE, CSV_SAVE_PATH
 from config import USE_DB, HOST, USER, PASSWORD, DB, TABLE 
-from config import WATERMETER_LIST
+from config import DEVICES
 from config import MAXIMUM_CONNECTABLE_USB_LIST
 
 from tools.flip           import flip
@@ -102,7 +102,7 @@ class LXCSetup():
     
     def find_serial_num(self):
         if self.status == 'GOOD':
-            for fliped_serial_num in flip(list(WATERMETER_LIST.keys())):
+            for fliped_serial_num in flip(list(DEVICES['lxc'].keys())):
                 select_command = to_select_command(fliped_serial_num)
                 try:
                     self.ser.write(select_command)
@@ -118,9 +118,9 @@ class LXCSetup():
                 if response == b'\xE5':
                     self.select_cmd     = select_command
                     self.serial_num     = flip(fliped_serial_num)
-                    self.watermeter_num = WATERMETER_LIST[self.serial_num][0]
-                    self.pipe_size      = WATERMETER_LIST[self.serial_num][1]
-                    self.location       = WATERMETER_LIST[self.serial_num][2]
+                    self.watermeter_num = DEVICES['lxc'][self.serial_num][0]
+                    self.pipe_size      = DEVICES['lxc'][self.serial_num][1]
+                    self.location       = DEVICES['lxc'][self.serial_num][2]
                     print('success', f'[{self.serial_num}] -> [{self.location}].', self.tag)
                     self.status = 'GOOD'
                     break
