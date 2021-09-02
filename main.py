@@ -40,7 +40,7 @@ def init():
         # LXC Serial number list
         print('log', 'LXC Serial number search list :')
         for serial_num in list(DEVICES['lxc'].keys()):
-            print('log', f'  - {DEVICES[serial_num][0]}  {DEVICES[serial_num][1]}  {serial_num}  {DEVICES[serial_num][2]}')
+            print('log', f'  - {DEVICES["lxc"][serial_num][0]}  {DEVICES["lxc"][serial_num][1]}  {serial_num}  {DEVICES["lxc"][serial_num][2]}')
     
         # USB list update
         print('log', 'USB connected by Raspberry pi :')
