@@ -414,4 +414,55 @@ DEVICE_LIST = {
             "21060003" : [ 3, "15A", "TEST_MAIN_HOTWATER"]
         }
     },
+
+    "TEST-6" : {
+        "m30j2" : {
+            "8-052121B408" : [ 1, "AP_WATER"]
+        },
+        "lxc" : {
+            "21040001" : [ 1, "15A", "AP_WATER"],
+            "21040002" : [ 2, "15A", "AP_HEATINGWATER"],
+            "21040003" : [ 3, "15A", "FIRSTFLOOR_KITCHEN"],
+            "21040004" : [ 4, "15A", "FIRSTFLOOR_RESTROOM_TOILET"],
+            "21040005" : [ 5, "15A", "FIRSTFLOOR_RESTROOM_WASHBASIN"],
+            "21040006" : [ 6, "15A", "FIRSTFLOOR_RESTROOM_SHOWERS"],
+            "21040007" : [ 7, "15A", "FIRSTFLOOR_UTILITYROOM_WASHER"]
+        }
+    },
+    "TEST-7" : {
+        "lxc" : {
+            "21040008" : [ 8, "15A", "AP_WATER"],
+            "21040009" : [ 9, "15A", "AP_HEATINGWATER"],
+            "21040010" : [10, "15A", "FIRSTFLOOR_KITCHEN"],
+            "21040011" : [11, "15A", "FIRSTFLOOR_RESTROOM_TOILET"],
+            "21040012" : [12, "15A", "FIRSTFLOOR_RESTROOM_WASHBASIN"],
+            "21040013" : [13, "15A", "FIRSTFLOOR_RESTROOM_SHOWERS"],
+            "21040014" : [14, "15A", "FIRSTFLOOR_UTILITYROOM_WASHER"]
+        }
+    },
+    "TEST-8" : {
+        "m30j2" : {
+            "8-052121B428" : [ 1, "AP_WATER"]
+        },
+        "lxc" : {
+            "21040015" : [ 1, "15A", "AP_WATER"],
+            "21040016" : [ 2, "15A", "AP_HEATINGWATER"],
+            "21040017" : [ 3, "15A", "FIRSTFLOOR_KITCHEN"],
+            "21040018" : [ 4, "15A", "FIRSTFLOOR_RESTROOM_TOILET"],
+            "21040019" : [ 5, "15A", "FIRSTFLOOR_RESTROOM_WASHBASIN"],
+            "21040020" : [ 6, "15A", "FIRSTFLOOR_RESTROOM_SHOWERS"],
+            "21040021" : [ 7, "15A", "FIRSTFLOOR_UTILITYROOM_WASHER"]
+        }
+    },
+    "TEST-9" : {
+        "lxc" : {
+            "21040022" : [ 8, "15A", "AP_WATER"],
+            "21040023" : [ 9, "15A", "AP_HEATINGWATER"],
+            "21040024" : [10, "15A", "FIRSTFLOOR_KITCHEN"],
+            "21040025" : [11, "15A", "FIRSTFLOOR_RESTROOM_TOILET"],
+            "21040026" : [12, "15A", "FIRSTFLOOR_RESTROOM_WASHBASIN"],
+            "21040027" : [13, "15A", "FIRSTFLOOR_RESTROOM_SHOWERS"],
+            "21040028" : [14, "15A", "FIRSTFLOOR_UTILITYROOM_WASHER"]
+        }
+    },
 }
